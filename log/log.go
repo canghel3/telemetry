@@ -3,39 +3,39 @@ package log
 import (
 	"fmt"
 	"telemetry/drivers"
-	"telemetry/level"
+	"telemetry/levels"
 	"time"
 )
 
 type Log struct {
-	driver   drivers.Generic
-	metadata map[any]any
-	buf      []byte
-	level    uint8
+	outputDriver drivers.OutputDriver
+	metadata     map[any]any
+	buf          []byte
+	level        uint8
 }
 
 func (l *Log) NoLevel() *Log {
-	l.level = level.NoLevel
+	l.level = levels.NoLevel
 	return l
 }
 
 func (l *Log) Error() *Log {
-	l.level = level.LevelError
+	l.level = levels.LevelError
 	return l
 }
 
 func (l *Log) Warn() *Log {
-	l.level = level.LevelWarn
+	l.level = levels.LevelWarn
 	return l
 }
 
 func (l *Log) Info() *Log {
-	l.level = level.LevelInfo
+	l.level = levels.LevelInfo
 	return l
 }
 
 func (l *Log) Debug() *Log {
-	l.level = level.LevelDebug
+	l.level = levels.LevelDebug
 	return l
 }
 
@@ -46,25 +46,25 @@ func (l *Log) Meta(data map[any]any) *Log {
 
 func File(name string) *Log {
 	return &Log{
-		driver: drivers.ToFileWithName(name),
+		outputDriver: drivers.ToFileWithName(name),
 	}
 }
 
 func Stdout() *Log {
 	return &Log{
-		driver: drivers.ToStdout(),
+		outputDriver: drivers.ToStdout(),
 	}
 }
 
-func Custom(driver drivers.Generic) *Log {
+func Custom(driver drivers.OutputDriver) *Log {
 	return &Log{
-		driver: driver,
+		outputDriver: driver,
 	}
 }
 
 func (l *Log) Write(b []byte) {
 	l.buf = b
-	err := l.driver.Write(formatLogOutput(l))
+	err := l.outputDriver.Write(formatLogOutput(l))
 	if err != nil {
 		return
 	}
@@ -77,16 +77,17 @@ func formatLogOutput(l *Log) []byte {
 	var out = make([]byte, 0)
 	out = append(out, []byte(timestamp.String())...)
 	out = append(out, byte(' '))
-	out = append(out, []byte(level.LevelToText[l.level])...)
+	out = append(out, []byte(levels.LevelToText[l.level])...)
 	out = append(out, byte(' '))
 
 	var meta2bytes = make([]byte, 0)
 	for k, v := range l.metadata {
-		meta2bytes = append(meta2bytes, []byte(fmt.Sprintf("%v:%v ", k, v))...)
+		meta2bytes = append(meta2bytes, []byte(fmt.Sprintf("%v:%v ", k, v))...) //careful
 	}
+	//very careful (whitespace)
 	out = append(out, meta2bytes...)
 	out = append(out, l.buf...)
-	out = append(out, []byte("\n")...)
+	out = append(out, '\n')
 
 	return out
 }

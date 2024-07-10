@@ -1,4 +1,4 @@
-package level
+package levels
 
 const (
 	NoLevel    = 0

@@ -1,5 +1,5 @@
 package drivers
 
-type Generic interface {
+type OutputDriver interface {
 	Write([]byte) error
 }
