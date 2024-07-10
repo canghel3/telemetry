@@ -27,6 +27,7 @@ func (l *Log) MakeTx() *Tx {
 }
 
 func (tx *Tx) Write(p []byte) {
+	//TODO: maybe add newline?
 	tx.log.buf = append(tx.log.buf, p...)
 }
 
