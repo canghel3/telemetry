@@ -14,6 +14,33 @@ type Log struct {
 	level        uint8
 }
 
+type Tx struct {
+	id  string
+	log *Log
+}
+
+func (l *Log) MakeTx() *Tx {
+	return &Tx{
+		id:  "", //set id to uuid v4
+		log: l,
+	}
+}
+
+func (tx *Tx) Write(p []byte) {
+	tx.log.buf = append(tx.log.buf, p...)
+}
+
+func (tx *Tx) End() error {
+	err := tx.log.outputDriver.Write(tx.log.buf)
+	if err != nil {
+		return err
+
+	}
+
+	tx.log.buf = []byte{}
+	return nil
+}
+
 func (l *Log) NoLevel() *Log {
 	l.level = levels.NoLevel
 	return l
