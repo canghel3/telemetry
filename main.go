@@ -17,6 +17,10 @@ func (cd *CustomDriver) Write(p []byte) error {
 func main() {
 	log.Stdout().Error().Write([]byte("HELLO"))
 
+	stdout := log.Stdout()
+	stdout.Error().Write([]byte("HELLO"))
+	stdout.Info().Write([]byte("WORLD"))
+
 	var customDriver CustomDriver
 	customDriver.Write([]byte("ยัญชนะ(⟨б⟩, ⟨в⟩, ⟨г⟩"))
 	fmt.Println(customDriver.msg)

@@ -2,7 +2,6 @@ package log
 
 import (
 	"fmt"
-	"sync"
 	"telemetry/drivers"
 	"telemetry/levels"
 	"time"
@@ -14,7 +13,6 @@ var logger = Default()
 
 type Log struct {
 	buf          []byte
-	levelLock    *sync.Mutex
 	level        uint8 //TODO: use an interface so that we can easily add other levels?
 	outputDriver drivers.OutputDriver
 	metadata     map[any]any
@@ -23,7 +21,6 @@ type Log struct {
 func Default() *Log {
 	return &Log{
 		outputDriver: drivers.ToStdout(),
-		levelLock:    &sync.Mutex{},
 		metadata:     nil,
 		buf:          nil,
 		level:        levels.NoLevel,
@@ -55,8 +52,9 @@ func (l *Log) Debug() *Log {
 	return l
 }
 
-func (l *Log) CustomLevel() {
-
+func (l *Log) CustomLevel() *Log {
+	l.level = 0 //TODO: implement
+	return l
 }
 
 func (l *Log) Metadata(data map[any]any) *Log {
@@ -76,7 +74,7 @@ func Stdout() *Log {
 	}
 }
 
-func Custom(driver drivers.OutputDriver) *Log {
+func CustomOutputDriver(driver drivers.OutputDriver) *Log {
 	return &Log{
 		outputDriver: driver,
 	}
