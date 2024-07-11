@@ -2,46 +2,32 @@ package log
 
 import (
 	"fmt"
+	"sync"
 	"telemetry/drivers"
 	"telemetry/levels"
 	"time"
 )
 
-//TODO: add global logger so that we do not have to specify the output every time?
+//TODO: add global logger so that we do not have to specify the output driver every time?
+
+var logger = Default()
 
 type Log struct {
+	buf          []byte
+	levelLock    *sync.Mutex
+	level        uint8 //TODO: use an interface so that we can easily add other levels?
 	outputDriver drivers.OutputDriver
 	metadata     map[any]any
-	buf          []byte
-	level        uint8
 }
 
-type Tx struct {
-	id  string
-	log *Log
-}
-
-func (l *Log) MakeTx() *Tx {
-	return &Tx{
-		id:  "", //set id to uuid v4
-		log: l,
+func Default() *Log {
+	return &Log{
+		outputDriver: drivers.ToStdout(),
+		levelLock:    &sync.Mutex{},
+		metadata:     nil,
+		buf:          nil,
+		level:        levels.NoLevel,
 	}
-}
-
-func (tx *Tx) Write(p []byte) {
-	//TODO: maybe add newline?
-	tx.log.buf = append(tx.log.buf, p...)
-}
-
-func (tx *Tx) End() error {
-	err := tx.log.outputDriver.Write(tx.log.buf)
-	if err != nil {
-		return err
-
-	}
-
-	tx.log.buf = []byte{}
-	return nil
 }
 
 func (l *Log) NoLevel() *Log {
@@ -69,7 +55,11 @@ func (l *Log) Debug() *Log {
 	return l
 }
 
-func (l *Log) Meta(data map[any]any) *Log {
+func (l *Log) CustomLevel() {
+
+}
+
+func (l *Log) Metadata(data map[any]any) *Log {
 	l.metadata = data
 	return l
 }
@@ -92,12 +82,16 @@ func Custom(driver drivers.OutputDriver) *Log {
 	}
 }
 
+// Write sends the current log buffer to the output driver for further handling.
+// The buffer is emptied and can be reused.
 func (l *Log) Write(b []byte) {
 	l.buf = b
 	err := l.outputDriver.Write(formatLogOutput(l))
 	if err != nil {
 		return
 	}
+
+	l.buf = []byte{}
 }
 
 func formatLogOutput(l *Log) []byte {
