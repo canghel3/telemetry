@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+//TODO: add global logger so that we do not have to specify the output every time?
+
 type Log struct {
 	outputDriver drivers.OutputDriver
 	metadata     map[any]any
