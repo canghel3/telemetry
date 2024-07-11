@@ -1,5 +1,7 @@
 package levels
 
+//TODO: consider refactoring levels to an interface for easy addition of new levels
+
 const (
 	NoLevel    = 0
 	LevelError = 1
