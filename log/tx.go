@@ -1,46 +1,42 @@
 package log
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/google/uuid"
+)
 
 type Tx struct {
 	id         string
 	commited   bool
 	attributes map[any]any
-	logs       []Log
+	logs       Logger
 }
 
-func (l *Log) BeginTx() *Tx {
+func (l *Logger) BeginTx() *Tx {
 	return &Tx{
-		id:   "", //set id to uuid v4
-		logs: []Log{*l},
+		id:   uuid.New().String(),
+		logs: *l,
 	}
 }
 
-func (l *Log) BeginTxWithMetadata(metadata map[any]any) *Tx {
+func (l *Logger) BeginTxWithMetadata(metadata map[any]any) *Tx {
 	return &Tx{
-		logs:       []Log{*l},
-		id:         "",
+		logs:       *l,
+		id:         uuid.New().String(),
 		attributes: metadata,
 		commited:   false,
 	}
 }
 
-func (tx *Tx) Append(log *Log) {
+func (tx *Tx) Append(log *Logger) {
 	if !tx.commited {
-		tx.logs = append(tx.logs, *log)
+		tx.logs = *log
 	}
 }
 
 func (tx *Tx) Commit() error {
 	if !tx.commited {
-		for _, log := range tx.logs {
-			err := log.outputDriver.Write(formatLogOutput(&log))
-			if err != nil {
-				return err
-
-			}
-		}
-		return nil
+		return tx.logs.outputDriver.Write(tx.logs.buf)
 	}
 
 	return fmt.Errorf("transaction already committed")
