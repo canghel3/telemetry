@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"telemetry/log"
 )
@@ -31,8 +30,5 @@ func main() {
 	tx.Append(log.Stdout().Msg([]byte("TO STDOUT!")))
 	tx.Commit()
 
-	var customDriver CustomDriver
-	customDriver.Write([]byte("ยัญชนะ(⟨б⟩, ⟨в⟩, ⟨г⟩"))
-	fmt.Println(customDriver.msg)
 	os.WriteFile(LOGFILE, nil, 0644)
 }

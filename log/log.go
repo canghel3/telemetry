@@ -7,10 +7,6 @@ import (
 	"time"
 )
 
-//TODO: add global logger so that we do not have to specify the output driver every time?
-
-var logger = Default()
-
 type Logger struct {
 	buf          []byte
 	level        uint8 //TODO: use an interface so that we can easily add other levels?
@@ -93,11 +89,11 @@ func (l *Logger) Msg(b []byte) *Logger {
 	return cpy
 }
 
-// Write sends the current log buffer to the output driver for further handling.
+// Write sends the (current log buffer + received "b") to the output driver for further handling.
 // The buffer is emptied and can be reused.
 // If an error occurs during writing, it panics.
 func (l *Logger) Write(b []byte) {
-	l.buf = b
+	l.buf = append(l.buf, b...)
 	err := l.outputDriver.Write(formatLogOutput(l))
 	if err != nil {
 		panic(err)
@@ -106,6 +102,7 @@ func (l *Logger) Write(b []byte) {
 	l.buf = []byte{}
 }
 
+// TODO: enable config formatting
 func formatLogOutput(l *Logger) []byte {
 	//TIMESTAMP LEVEL METADATA BUFFER
 	timestamp := time.Now()
