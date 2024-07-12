@@ -15,7 +15,6 @@ type Logger struct {
 	buf          []byte
 	level        uint8 //TODO: use an interface so that we can easily add other levels?
 	outputDriver drivers.OutputDriver
-	tx           *Tx
 	metadata     map[any]any
 }
 
@@ -81,18 +80,17 @@ func CustomOutputDriver(driver drivers.OutputDriver) *Logger {
 	}
 }
 
-func (l *Logger) Append(b []byte) *Logger {
+// Msg returns a copy of the Logger receiver, except for the buf, which is overwritten.
+func (l *Logger) Msg(b []byte) *Logger {
 	cpy := &Logger{
-		buf:          make([]byte, len(b)),
+		buf:          b,
 		level:        l.level,
 		outputDriver: l.outputDriver,
-		tx:           l.tx,
 		metadata:     l.metadata,
 	}
 
-	copy(cpy.buf, b)
-	l.buf = append(l.buf, formatLogOutput(cpy)...)
-	return l
+	cpy.buf = formatLogOutput(cpy)
+	return cpy
 }
 
 // Write sends the current log buffer to the output driver for further handling.

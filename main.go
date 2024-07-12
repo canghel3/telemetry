@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"telemetry/log"
 )
 
@@ -15,6 +16,7 @@ func (cd *CustomDriver) Write(p []byte) error {
 }
 
 func main() {
+	const LOGFILE = "./telemetry.log"
 	log.Stdout().Error().Write([]byte("HELLO"))
 
 	stdout := log.Stdout()
@@ -22,13 +24,15 @@ func main() {
 	stdout.Error().Write([]byte("HELLO"))
 	stdout.Info().Write([]byte("WORLD"))
 
-	toFile := log.File("./telemetry.log")
+	toFile := log.File(LOGFILE)
 	tx := toFile.BeginTx()
-	tx.Append(toFile.Error().Append([]byte("hallelujah")))
-	tx.Append(toFile.Info().Append([]byte("marcele, la covrigarie!")))
+	tx.Append(toFile.Error().Msg([]byte("hallelujah")))
+	tx.Append(toFile.Info().Msg([]byte("marcele, la covrigarie!")))
+	tx.Append(log.Stdout().Msg([]byte("TO STDOUT!")))
 	tx.Commit()
 
 	var customDriver CustomDriver
 	customDriver.Write([]byte("ยัญชนะ(⟨б⟩, ⟨в⟩, ⟨г⟩"))
 	fmt.Println(customDriver.msg)
+	os.WriteFile(LOGFILE, nil, 0644)
 }
