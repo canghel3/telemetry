@@ -16,12 +16,12 @@ func (cd *CustomDriver) Write(p []byte) error {
 
 func main() {
 	const LOGFILE = "./telemetry.log"
-	log.Stdout().Error().Write([]byte("HELLO"))
+	log.Stdout().Error().Log([]byte("HELLO"))
 
 	stdout := log.Stdout()
 
-	stdout.Error().Write([]byte("HELLO"))
-	stdout.Info().Write([]byte("WORLD"))
+	stdout.Error().Log([]byte("HELLO"))
+	stdout.Info().Log([]byte("WORLD"))
 
 	toFile := log.File(LOGFILE)
 	tx := toFile.BeginTx()

@@ -15,102 +15,100 @@ import (
 
 func TestOutputToFile(t *testing.T) {
 	file := "xyz.txt"
+	_, err := os.Create(file)
+	assert.NilError(t, err)
+
 	t.Run("LEVELS", func(t *testing.T) {
 		content := []byte("the quick brown fox jumps over the lazy dog")
 		moreContent := []byte("พยัญชนะ(⟨б⟩, ⟨в⟩, ⟨г⟩, ⟨д⟩, ⟨ж⟩, ⟨з⟩, ⟨к⟩, ⟨л⟩, ⟨м⟩, ⟨н⟩, ⟨п⟩, ⟨р⟩, ⟨с⟩, ⟨т⟩, ⟨ф⟩, ⟨х⟩, ⟨ц⟩, ⟨ч⟩, ⟨ш⟩, ⟨щ⟩")
 
 		t.Run("NO LEVEL", func(t *testing.T) {
-			lvl := level.LevelToText[level.NoLevel]
-			log.File(file).NoLevel().Write(content)
+			log.File(file).NoLevel().Log(content)
 
 			retrieved, err := os.ReadFile(file)
 			assert.NilError(t, err)
 
-			expected := []byte(lvl + " " + string(content) + "\n")
+			expected := []byte(level.NewNoLevel().Type() + " " + string(content) + "\n")
 			assert.Assert(t, bytes.Contains(retrieved, expected) == true)
 
-			log.File(file).NoLevel().Write(moreContent)
+			log.File(file).NoLevel().Log(moreContent)
 
 			retrieved, err = os.ReadFile(file)
 			assert.NilError(t, err)
 
-			expected = []byte(lvl + " " + string(moreContent) + "\n")
+			expected = []byte(level.NewNoLevel().Type() + " " + string(moreContent) + "\n")
 			assert.Assert(t, bytes.Contains(retrieved, expected) == true)
 		})
 
 		t.Run("ERROR LEVEL", func(t *testing.T) {
-			lvl := level.LevelToText[level.LevelError]
-			log.File(file).Error().Write(content)
+			log.File(file).Error().Log(content)
 
 			retrieved, err := os.ReadFile(file)
 			assert.NilError(t, err)
 
-			expected := []byte(lvl + " " + string(content) + "\n")
+			expected := []byte(level.NewErrorLevel().Type() + " " + string(content) + "\n")
 			assert.Assert(t, bytes.Contains(retrieved, expected) == true)
 
-			log.File(file).Error().Write(moreContent)
+			log.File(file).Error().Log(moreContent)
 
 			retrieved, err = os.ReadFile(file)
 			assert.NilError(t, err)
 
-			expected = []byte(lvl + " " + string(moreContent) + "\n")
+			expected = []byte(level.NewErrorLevel().Type() + " " + string(moreContent) + "\n")
 			assert.Assert(t, bytes.Contains(retrieved, expected) == true)
 		})
 
 		t.Run("WARN LEVEL", func(t *testing.T) {
-			lvl := level.LevelToText[level.LevelWarn]
-			log.File(file).Warn().Write(content)
+			log.File(file).Warn().Log(content)
 
 			retrieved, err := os.ReadFile(file)
 			assert.NilError(t, err)
 
-			expected := []byte(lvl + " " + string(content) + "\n")
+			expected := []byte(level.NewWarnLevel().Type() + " " + string(content) + "\n")
 			assert.Assert(t, bytes.Contains(retrieved, expected) == true)
 
-			log.File(file).Warn().Write(moreContent)
+			log.File(file).Warn().Log(moreContent)
 
 			retrieved, err = os.ReadFile(file)
 			assert.NilError(t, err)
 
-			expected = []byte(lvl + " " + string(moreContent) + "\n")
+			expected = []byte(level.NewWarnLevel().Type() + " " + string(moreContent) + "\n")
 			assert.Assert(t, bytes.Contains(retrieved, expected) == true)
 		})
 
 		t.Run("INFO LEVEL", func(t *testing.T) {
-			lvl := level.LevelToText[level.LevelInfo]
-			log.File(file).Info().Write(content)
+			log.File(file).Info().Log(content)
 
 			retrieved, err := os.ReadFile(file)
 			assert.NilError(t, err)
 
-			expected := []byte(lvl + " " + string(content) + "\n")
+			expected := []byte(level.NewInfoLevel().Type() + " " + string(content) + "\n")
 			assert.Assert(t, bytes.Contains(retrieved, expected) == true)
 
-			log.File(file).Info().Write(moreContent)
+			log.File(file).Info().Log(moreContent)
 
 			retrieved, err = os.ReadFile(file)
 			assert.NilError(t, err)
 
-			expected = []byte(lvl + " " + string(moreContent) + "\n")
+			expected = []byte(level.NewInfoLevel().Type() + " " + string(moreContent) + "\n")
 			assert.Assert(t, bytes.Contains(retrieved, expected) == true)
 		})
 
 		t.Run("DEBUG LEVEL", func(t *testing.T) {
-			lvl := level.LevelToText[level.LevelDebug]
-			log.File(file).Debug().Write(content)
+			log.File(file).Debug().Log(content)
 
 			retrieved, err := os.ReadFile(file)
 			assert.NilError(t, err)
 
-			expected := []byte(lvl + " " + string(content) + "\n")
+			expected := []byte(level.NewDebugLevel().Type() + " " + string(content) + "\n")
 			assert.Assert(t, bytes.Contains(retrieved, expected) == true)
 
-			log.File(file).Debug().Write(moreContent)
+			log.File(file).Debug().Log(moreContent)
 
 			retrieved, err = os.ReadFile(file)
 			assert.NilError(t, err)
 
-			expected = []byte(lvl + " " + string(moreContent) + "\n")
+			expected = []byte(level.NewDebugLevel().Type() + " " + string(moreContent) + "\n")
 			assert.Assert(t, bytes.Contains(retrieved, expected) == true)
 		})
 	})

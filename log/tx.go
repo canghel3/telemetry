@@ -14,8 +14,10 @@ type Tx struct {
 
 func (l *Logger) BeginTx() *Tx {
 	return &Tx{
-		id:   uuid.New().String(),
-		logs: []Logger{},
+		id:         uuid.New().String(),
+		logs:       []Logger{},
+		attributes: nil,
+		commited:   false,
 	}
 }
 
@@ -36,9 +38,8 @@ func (tx *Tx) Append(log *Logger) {
 
 func (tx *Tx) Commit() error {
 	if !tx.commited {
-		//TODO: format transaction output
 		for _, log := range tx.logs {
-			err := log.outputDriver.Write(formatTransactionOutput(&log, tx.id))
+			err := log.outputDriver.Log(formatTransactionOutput(&log, tx.id))
 			if err != nil {
 				return err
 			}

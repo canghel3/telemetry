@@ -10,8 +10,8 @@ func ToFileWithName(name string) *File {
 	return &File{name}
 }
 
-// Write always appends for files.
-func (f *File) Write(p []byte) error {
+// Log always appends for files.
+func (f *File) Log(p []byte) error {
 	file, err := os.OpenFile(f.name, os.O_APPEND, os.ModeAppend)
 	if err != nil {
 		return err

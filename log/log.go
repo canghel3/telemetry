@@ -9,7 +9,7 @@ import (
 
 type Logger struct {
 	buf          []byte
-	level        uint8 //TODO: use an interface so that we can easily add other levels?
+	level        level.Level
 	outputDriver drivers.OutputDriver
 	metadata     map[any]any
 }
@@ -19,37 +19,39 @@ func Default() *Logger {
 		outputDriver: drivers.ToStdout(),
 		metadata:     nil,
 		buf:          nil,
-		level:        level.NoLevel,
+		level:        level.NewNoLevel(),
 	}
 }
 
 func (l *Logger) NoLevel() *Logger {
-	l.level = level.NoLevel
+	l.level = level.NewNoLevel()
 	return l
 }
 
+// Error sets the level type to ERROR.
 func (l *Logger) Error() *Logger {
-	l.level = level.LevelError
+	l.level = level.NewErrorLevel()
 	return l
 }
 
+// Warn sets the level type to WARN.
 func (l *Logger) Warn() *Logger {
-	l.level = level.LevelWarn
+	l.level = level.NewWarnLevel()
 	return l
 }
 
 func (l *Logger) Info() *Logger {
-	l.level = level.LevelInfo
+	l.level = level.NewInfoLevel()
 	return l
 }
 
 func (l *Logger) Debug() *Logger {
-	l.level = level.LevelDebug
+	l.level = level.NewDebugLevel()
 	return l
 }
 
-func (l *Logger) CustomLevel() *Logger {
-	l.level = 0
+func (l *Logger) CustomLevel(lvl level.Level) *Logger {
+	l.level = lvl
 	return l
 }
 
@@ -59,24 +61,25 @@ func (l *Logger) Metadata(data map[any]any) *Logger {
 }
 
 func File(name string) *Logger {
-	return &Logger{
-		outputDriver: drivers.ToFileWithName(name),
-	}
+	l := Default()
+	l.outputDriver = drivers.ToFileWithName(name)
+	return l
 }
 
 func Stdout() *Logger {
-	return &Logger{
-		outputDriver: drivers.ToStdout(),
-	}
+	l := Default()
+	l.outputDriver = drivers.ToStdout()
+	return l
 }
 
 func CustomOutputDriver(driver drivers.OutputDriver) *Logger {
-	return &Logger{
-		outputDriver: driver,
-	}
+	l := Default()
+	l.outputDriver = driver
+	return l
 }
 
 // Msg returns a copy of the Logger receiver, except for the buf, which is overwritten.
+// Useful for logging transactions.
 func (l *Logger) Msg(b []byte) *Logger {
 	cpy := &Logger{
 		buf:          b,
@@ -89,12 +92,12 @@ func (l *Logger) Msg(b []byte) *Logger {
 	return cpy
 }
 
-// Write sends the (current log buffer + received "b") to the output driver for further handling.
+// Log sends the (current log buffer + received "b") to the output driver for further handling.
 // The buffer is emptied and can be reused.
 // If an error occurs during writing, it panics.
-func (l *Logger) Write(b []byte) {
+func (l *Logger) Log(b []byte) {
 	l.buf = append(l.buf, b...)
-	err := l.outputDriver.Write(formatLogOutput(l))
+	err := l.outputDriver.Log(formatLogOutput(l))
 	if err != nil {
 		panic(err)
 	}
@@ -110,7 +113,7 @@ func formatLogOutput(l *Logger) []byte {
 	var out = make([]byte, 0)
 	out = append(out, []byte(timestamp.String())...)
 	out = append(out, byte(' '))
-	out = append(out, []byte(level.LevelToText[l.level])...)
+	out = append(out, []byte(l.level.Type())...)
 	out = append(out, byte(' '))
 
 	var meta2bytes = make([]byte, 0)
