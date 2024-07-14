@@ -19,38 +19,38 @@ func Default() *Logger {
 		outputDriver: drivers.ToStdout(),
 		metadata:     nil,
 		buf:          nil,
-		level:        level.NewNoLevel(),
+		level:        level.None(),
 	}
 }
 
 func (l *Logger) NoLevel() *Logger {
-	l.level = level.NewNoLevel()
+	l.level = level.None()
 	return l
 }
 
 // Error sets the level type to ERROR.
 func (l *Logger) Error() *Logger {
-	l.level = level.NewErrorLevel()
+	l.level = level.Error()
 	return l
 }
 
 // Warn sets the level type to WARN.
 func (l *Logger) Warn() *Logger {
-	l.level = level.NewWarnLevel()
+	l.level = level.Warn()
 	return l
 }
 
 func (l *Logger) Info() *Logger {
-	l.level = level.NewInfoLevel()
+	l.level = level.Info()
 	return l
 }
 
 func (l *Logger) Debug() *Logger {
-	l.level = level.NewDebugLevel()
+	l.level = level.Debug()
 	return l
 }
 
-func (l *Logger) CustomLevel(lvl level.Level) *Logger {
+func (l *Logger) Level(lvl level.Level) *Logger {
 	l.level = lvl
 	return l
 }

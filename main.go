@@ -24,7 +24,7 @@ func main() {
 	stdout.Info().Log([]byte("WORLD"))
 
 	toFile := log.File(LOGFILE)
-	tx := toFile.BeginTx()
+	tx := log.BeginTx()
 	tx.Append(toFile.Error().Msg([]byte("hallelujah")))
 	tx.Append(toFile.Info().Msg([]byte("marcele, la covrigarie!")))
 	tx.Append(log.Stdout().Msg([]byte("TO STDOUT!")))

@@ -4,7 +4,7 @@ type LevelDebug struct {
 	levelType string
 }
 
-func NewDebugLevel() *LevelDebug {
+func Debug() *LevelDebug {
 	return &LevelDebug{levelType: "DEBUG"}
 }
 

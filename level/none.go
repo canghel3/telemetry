@@ -4,7 +4,7 @@ type NoLevel struct {
 	levelType string
 }
 
-func NewNoLevel() *NoLevel {
+func None() *NoLevel {
 	return &NoLevel{levelType: ""}
 }
 

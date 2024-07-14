@@ -4,7 +4,7 @@ type LevelError struct {
 	levelType string
 }
 
-func NewErrorLevel() *LevelError {
+func Error() *LevelError {
 	return &LevelError{levelType: "ERROR"}
 }
 

@@ -4,7 +4,7 @@ type LevelWarn struct {
 	levelType string
 }
 
-func NewWarnLevel() *LevelWarn {
+func Warn() *LevelWarn {
 	return &LevelWarn{levelType: "WARN"}
 }
 

@@ -12,7 +12,7 @@ type Tx struct {
 	logs       []Logger
 }
 
-func (l *Logger) BeginTx() *Tx {
+func BeginTx() *Tx {
 	return &Tx{
 		id:         uuid.New().String(),
 		logs:       []Logger{},
@@ -21,7 +21,7 @@ func (l *Logger) BeginTx() *Tx {
 	}
 }
 
-func (l *Logger) BeginTxWithMetadata(metadata map[any]any) *Tx {
+func BeginTxWithMetadata(metadata map[any]any) *Tx {
 	return &Tx{
 		logs:       []Logger{},
 		id:         uuid.New().String(),

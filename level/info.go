@@ -4,7 +4,7 @@ type LevelInfo struct {
 	levelType string
 }
 
-func NewInfoLevel() *LevelInfo {
+func Info() *LevelInfo {
 	return &LevelInfo{levelType: "INFO"}
 }
 
