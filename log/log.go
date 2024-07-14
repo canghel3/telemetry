@@ -14,6 +14,7 @@ type Logger struct {
 	metadata     map[any]any
 }
 
+// Default initiates a Logger instance with a stdout driver and no log level.
 func Default() *Logger {
 	return &Logger{
 		outputDriver: drivers.ToStdout(),
@@ -23,33 +24,38 @@ func Default() *Logger {
 	}
 }
 
+// NoLevel empties the Logger level type.
 func (l *Logger) NoLevel() *Logger {
 	l.level = level.None()
 	return l
 }
 
-// Error sets the level type to ERROR.
+// Error sets the Logger level type to ERROR.
 func (l *Logger) Error() *Logger {
 	l.level = level.Error()
 	return l
 }
 
-// Warn sets the level type to WARN.
+// Warn sets the Logger level type to WARN.
 func (l *Logger) Warn() *Logger {
 	l.level = level.Warn()
 	return l
 }
 
+// Info sets the Logger level type to INFO.
 func (l *Logger) Info() *Logger {
 	l.level = level.Info()
 	return l
 }
 
+// Debug sets the Logger level type to DEBUG.
 func (l *Logger) Debug() *Logger {
 	l.level = level.Debug()
 	return l
 }
 
+// Level sets the Logger level type to the specified level.
+// Use level.Custom for generating a custom Logger level.
 func (l *Logger) Level(lvl level.Level) *Logger {
 	l.level = lvl
 	return l
@@ -60,18 +66,21 @@ func (l *Logger) Metadata(data map[any]any) *Logger {
 	return l
 }
 
+// File initiates a Logger instance for logging to the specified file.
 func File(name string) *Logger {
 	l := Default()
 	l.outputDriver = drivers.ToFileWithName(name)
 	return l
 }
 
+// Stdout initiates a Logger instance for logging to stdout.
 func Stdout() *Logger {
 	l := Default()
 	l.outputDriver = drivers.ToStdout()
 	return l
 }
 
+// CustomOutputDriver initiates a Logger instance for logging to a custom location.
 func CustomOutputDriver(driver drivers.OutputDriver) *Logger {
 	l := Default()
 	l.outputDriver = driver

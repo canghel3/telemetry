@@ -44,6 +44,7 @@ func (tx *Tx) Commit() error {
 				return err
 			}
 		}
+		tx.commited = true
 		return nil
 	}
 

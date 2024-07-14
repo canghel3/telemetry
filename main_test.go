@@ -163,23 +163,125 @@ func TestOutputToFile(t *testing.T) {
 		l2 := []byte("freedom is not for everyone. at least that's what the sign says")
 		l3 := []byte("I LIVE, I DIE, I LIVE AGAIN. WITNESS ME GOING TO VALHALLA!")
 
-		t.Run("USING VARIABLES", func(t *testing.T) {
+		t.Run("VERBOSE", func(t *testing.T) {
+			os.WriteFile(file, nil, 0600)
+
 			toFile := log.File(file)
 			tx := log.BeginTx()
 			tx.Append(toFile.Info().Msg(l1))
 			tx.Append(toFile.Level(level.Custom("MAJOR")).Msg(l2))
 			tx.Append(toFile.Warn().Msg(l3))
+			tx.Commit()
+
+			retrieved, err := os.ReadFile(file)
+			assert.NilError(t, err)
+
+			expected1 := []byte(level.Info().Type() + " " + string(l1) + "\n")
+			expected2 := []byte(level.Custom("MAJOR").Type() + " " + string(l2) + "\n")
+			expected3 := []byte(level.Warn().Type() + " " + string(l3) + "\n")
+			assert.Assert(t, bytes.Contains(retrieved, expected1) == true)
+			assert.Assert(t, bytes.Contains(retrieved, expected2) == true)
+			assert.Assert(t, bytes.Contains(retrieved, expected3) == true)
 		})
 
-		t.Run("WITHOUT USING VARIABLES", func(t *testing.T) {
-			//tx := log.BeginTx()
-			//tx.Append(log.File(.))
+		t.Run("IN-LINE", func(t *testing.T) {
+			os.WriteFile(file, nil, 0600)
+
+			tx := log.BeginTx()
+			tx.Append(log.File(file).Debug().Msg(l1))
+			tx.Append(log.File(file).NoLevel().Msg(l2))
+			tx.Append(log.File(file).Warn().Msg(l3))
+			tx.Commit()
+
+			retrieved, err := os.ReadFile(file)
+			assert.NilError(t, err)
+
+			expected1 := []byte(level.Debug().Type() + " " + string(l1) + "\n")
+			expected2 := []byte(level.None().Type() + " " + string(l2) + "\n")
+			expected3 := []byte(level.Warn().Type() + " " + string(l3) + "\n")
+			assert.Assert(t, bytes.Contains(retrieved, expected1) == true)
+			assert.Assert(t, bytes.Contains(retrieved, expected2) == true)
+			assert.Assert(t, bytes.Contains(retrieved, expected3) == true)
 		})
 
-		t.Run("APPEND DIFFERENT OUTPUT THAN TRANSACTION WAS INITIALIZED WITH", func(t *testing.T) {
+		t.Run("MIXED OUTPUTS", func(t *testing.T) {
+			os.WriteFile(file, nil, 0600)
 
+			toFile := log.File(file)
+			tx := log.BeginTx()
+			tx.Append(toFile.Info().Msg(l1))
+			tx.Append(toFile.Level(level.Custom("MAJOR")).Msg(l2))
+			tx.Append(log.Stdout().Warn().Msg(l3))
+			tx.Commit()
+
+			retrieved, err := os.ReadFile(file)
+			assert.NilError(t, err)
+
+			expected1 := []byte(level.Info().Type() + " " + string(l1) + "\n")
+			expected2 := []byte(level.Custom("MAJOR").Type() + " " + string(l2) + "\n")
+			expected3 := []byte(level.Warn().Type() + " " + string(l3) + "\n")
+			assert.Assert(t, bytes.Contains(retrieved, expected1) == true)
+			assert.Assert(t, bytes.Contains(retrieved, expected2) == true)
+			assert.Assert(t, bytes.Contains(retrieved, expected3) == false)
 		})
 
+		t.Run("DID NOT COMMIT", func(t *testing.T) {
+			os.WriteFile(file, nil, 0600)
+
+			toFile := log.File(file)
+			tx := log.BeginTx()
+			tx.Append(toFile.Info().Msg(l1))
+			tx.Append(toFile.Level(level.Custom("MAJOR")).Msg(l2))
+			tx.Append(log.Stdout().Warn().Msg(l3))
+
+			retrieved, err := os.ReadFile(file)
+			assert.NilError(t, err)
+
+			assert.Assert(t, len(retrieved) == 0)
+		})
+
+		t.Run("ROLLBACK", func(t *testing.T) {
+			os.WriteFile(file, nil, 0600)
+
+			toFile := log.File(file)
+			tx := log.BeginTx()
+			tx.Append(toFile.Info().Msg(l1))
+			tx.Append(toFile.Level(level.Custom("MAJOR")).Msg(l2))
+			tx.Append(log.Stdout().Warn().Msg(l3))
+
+			retrieved, err := os.ReadFile(file)
+			assert.NilError(t, err)
+
+			assert.Assert(t, len(retrieved) == 0)
+		})
+
+		t.Run("ALREADY COMMITED", func(*testing.T) {
+			os.WriteFile(file, nil, 0600)
+
+			toFile := log.File(file)
+			tx := log.BeginTx()
+			tx.Append(toFile.Info().Msg(l1))
+			tx.Append(toFile.Level(level.Custom("MAJOR")).Msg(l2))
+			tx.Append(toFile.Warn().Msg(l3))
+			tx.Commit()
+			err := tx.Commit()
+
+			assert.Error(t, err, "transaction already committed or rolled back")
+		})
+
+		t.Run("ALREADY ROLLED BACK", func(t *testing.T) {
+			os.WriteFile(file, nil, 0600)
+
+			toFile := log.File(file)
+			tx := log.BeginTx()
+			tx.Append(toFile.Info().Msg(l1))
+			tx.Append(toFile.Level(level.Custom("MAJOR")).Msg(l2))
+			tx.Append(toFile.Warn().Msg(l3))
+			tx.Commit()
+			err := tx.Rollback()
+
+			assert.Error(t, err, "transaction already committed or rolled back")
+		})
 	})
 
 	t.Run("NIL CONTENT", func(t *testing.T) {
