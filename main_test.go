@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"gotest.tools/v3/assert"
 	"os"
-	"telemetry/levels"
+	"telemetry/level"
 	"telemetry/log"
 	"testing"
 )
@@ -20,7 +20,7 @@ func TestOutputToFile(t *testing.T) {
 		moreContent := []byte("พยัญชนะ(⟨б⟩, ⟨в⟩, ⟨г⟩, ⟨д⟩, ⟨ж⟩, ⟨з⟩, ⟨к⟩, ⟨л⟩, ⟨м⟩, ⟨н⟩, ⟨п⟩, ⟨р⟩, ⟨с⟩, ⟨т⟩, ⟨ф⟩, ⟨х⟩, ⟨ц⟩, ⟨ч⟩, ⟨ш⟩, ⟨щ⟩")
 
 		t.Run("NO LEVEL", func(t *testing.T) {
-			lvl := levels.LevelToText[levels.NoLevel]
+			lvl := level.LevelToText[level.NoLevel]
 			log.File(file).NoLevel().Write(content)
 
 			retrieved, err := os.ReadFile(file)
@@ -39,7 +39,7 @@ func TestOutputToFile(t *testing.T) {
 		})
 
 		t.Run("ERROR LEVEL", func(t *testing.T) {
-			lvl := levels.LevelToText[levels.LevelError]
+			lvl := level.LevelToText[level.LevelError]
 			log.File(file).Error().Write(content)
 
 			retrieved, err := os.ReadFile(file)
@@ -58,7 +58,7 @@ func TestOutputToFile(t *testing.T) {
 		})
 
 		t.Run("WARN LEVEL", func(t *testing.T) {
-			lvl := levels.LevelToText[levels.LevelWarn]
+			lvl := level.LevelToText[level.LevelWarn]
 			log.File(file).Warn().Write(content)
 
 			retrieved, err := os.ReadFile(file)
@@ -77,7 +77,7 @@ func TestOutputToFile(t *testing.T) {
 		})
 
 		t.Run("INFO LEVEL", func(t *testing.T) {
-			lvl := levels.LevelToText[levels.LevelInfo]
+			lvl := level.LevelToText[level.LevelInfo]
 			log.File(file).Info().Write(content)
 
 			retrieved, err := os.ReadFile(file)
@@ -96,7 +96,7 @@ func TestOutputToFile(t *testing.T) {
 		})
 
 		t.Run("DEBUG LEVEL", func(t *testing.T) {
-			lvl := levels.LevelToText[levels.LevelDebug]
+			lvl := level.LevelToText[level.LevelDebug]
 			log.File(file).Debug().Write(content)
 
 			retrieved, err := os.ReadFile(file)

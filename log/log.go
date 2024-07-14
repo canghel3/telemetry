@@ -3,7 +3,7 @@ package log
 import (
 	"fmt"
 	"telemetry/drivers"
-	"telemetry/levels"
+	"telemetry/level"
 	"time"
 )
 
@@ -19,37 +19,37 @@ func Default() *Logger {
 		outputDriver: drivers.ToStdout(),
 		metadata:     nil,
 		buf:          nil,
-		level:        levels.NoLevel,
+		level:        level.NoLevel,
 	}
 }
 
 func (l *Logger) NoLevel() *Logger {
-	l.level = levels.NoLevel
+	l.level = level.NoLevel
 	return l
 }
 
 func (l *Logger) Error() *Logger {
-	l.level = levels.LevelError
+	l.level = level.LevelError
 	return l
 }
 
 func (l *Logger) Warn() *Logger {
-	l.level = levels.LevelWarn
+	l.level = level.LevelWarn
 	return l
 }
 
 func (l *Logger) Info() *Logger {
-	l.level = levels.LevelInfo
+	l.level = level.LevelInfo
 	return l
 }
 
 func (l *Logger) Debug() *Logger {
-	l.level = levels.LevelDebug
+	l.level = level.LevelDebug
 	return l
 }
 
 func (l *Logger) CustomLevel() *Logger {
-	l.level = 0 //TODO: implement
+	l.level = 0
 	return l
 }
 
@@ -110,7 +110,7 @@ func formatLogOutput(l *Logger) []byte {
 	var out = make([]byte, 0)
 	out = append(out, []byte(timestamp.String())...)
 	out = append(out, byte(' '))
-	out = append(out, []byte(levels.LevelToText[l.level])...)
+	out = append(out, []byte(level.LevelToText[l.level])...)
 	out = append(out, byte(' '))
 
 	var meta2bytes = make([]byte, 0)
