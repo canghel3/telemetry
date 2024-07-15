@@ -1,5 +1,6 @@
 package drivers
 
+// OutputDriver adheres to io.Writer
 type OutputDriver interface {
-	Log([]byte) error
+	Write([]byte) (int, error)
 }

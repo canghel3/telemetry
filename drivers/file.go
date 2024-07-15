@@ -11,14 +11,13 @@ func ToFileWithName(name string) *File {
 }
 
 // Log always appends for files.
-func (f *File) Log(p []byte) error {
+func (f *File) Write(p []byte) (int, error) {
 	file, err := os.OpenFile(f.name, os.O_APPEND, os.ModeAppend)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	defer file.Close()
 
-	_, err = file.Write(p)
-	return err
+	return file.Write(p)
 }

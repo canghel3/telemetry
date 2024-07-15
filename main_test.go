@@ -2,8 +2,11 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"gotest.tools/v3/assert"
 	"os"
+	"strconv"
+	"sync"
 	"telemetry/level"
 	"telemetry/log"
 	"testing"
@@ -14,6 +17,14 @@ import (
 //3. Test output to custom driver with all severity levels and random content
 
 const file = "xyz.log"
+
+type errorDriver struct {
+	msg []byte
+}
+
+func (ed *errorDriver) Write(p []byte) (n int, err error) {
+	return 0, fmt.Errorf("intentional write error")
+}
 
 type customLevel struct {
 	levelType string
@@ -225,6 +236,34 @@ func TestOutputToFile(t *testing.T) {
 			assert.Assert(t, bytes.Contains(retrieved, expected3) == false)
 		})
 
+		t.Run("WITH METADATA", func(t *testing.T) {
+			t.FailNow()
+			os.WriteFile(file, nil, 0600)
+
+			meta := map[any]any{
+				1:       "2",
+				'a':     true,
+				3.14159: imag(complex(1, 1)),
+			}
+
+			toFile := log.File(file)
+			tx := log.BeginTxWithMetadata(meta)
+			tx.Append(toFile.Info().Msg(l1))
+			tx.Append(toFile.Level(level.Custom("MAJOR")).Msg(l2))
+			tx.Append(log.Stdout().Warn().Msg(l3))
+			tx.Commit()
+
+			retrieved, err := os.ReadFile(file)
+			assert.NilError(t, err)
+
+			expected1 := []byte(level.Info().Type() + " " + string(l1) + "\n")
+			expected2 := []byte(level.Custom("MAJOR").Type() + " " + string(l2) + "\n")
+			expected3 := []byte(level.Warn().Type() + " " + string(l3) + "\n")
+			assert.Assert(t, bytes.Contains(retrieved, expected1) == true)
+			assert.Assert(t, bytes.Contains(retrieved, expected2) == true)
+			assert.Assert(t, bytes.Contains(retrieved, expected3) == false)
+		})
+
 		t.Run("DID NOT COMMIT", func(t *testing.T) {
 			os.WriteFile(file, nil, 0600)
 
@@ -282,6 +321,40 @@ func TestOutputToFile(t *testing.T) {
 
 			assert.Error(t, err, "transaction already committed or rolled back")
 		})
+	})
+
+	t.Run("CONFIG FILE", func(t *testing.T) {
+
+	})
+
+	t.Run("FAILED TO WRITE LOG", func(t *testing.T) {
+		ed := &errorDriver{}
+		log.OutputDriver(ed).Info().Log([]byte("schmeckermeister"))
+
+		_, err := os.OpenFile(os.Stderr.Name(), os.O_RDONLY, 0777)
+		assert.NilError(t, err)
+		read, err := os.ReadFile(os.Stderr.Name())
+
+		assert.NilError(t, err)
+		assert.Assert(t, bytes.Equal(read, []byte("failed to write log: intentional write error\n")))
+	})
+
+	t.Run("CONCURRENT WRITING TO THE SAME FILE", func(t *testing.T) {
+		os.WriteFile(file, nil, 0600)
+
+		wg := sync.WaitGroup{}
+		//launch 100 goroutines to write to the same file
+		for i := 0; i < 100; i++ {
+			wg.Add(1)
+			content := []byte("some content " + strconv.Itoa(i))
+			go func() {
+				defer wg.Done()
+				toFile := log.File(file)
+				toFile.Info().Log(content)
+			}()
+		}
+
+		wg.Wait()
 	})
 
 	t.Run("NIL CONTENT", func(t *testing.T) {

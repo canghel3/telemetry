@@ -2,6 +2,7 @@ package log
 
 import (
 	"fmt"
+	"os"
 	"telemetry/drivers"
 	"telemetry/level"
 	"time"
@@ -80,8 +81,8 @@ func Stdout() *Logger {
 	return l
 }
 
-// CustomOutputDriver initiates a Logger instance for logging to a custom location.
-func CustomOutputDriver(driver drivers.OutputDriver) *Logger {
+// OutputDriver initiates a Logger instance for logging to a custom instance.
+func OutputDriver(driver drivers.OutputDriver) *Logger {
 	l := Default()
 	l.outputDriver = driver
 	return l
@@ -97,25 +98,30 @@ func (l *Logger) Msg(b []byte) *Logger {
 		metadata:     l.metadata,
 	}
 
-	cpy.buf = formatLogOutput(cpy)
+	cpy.buf = formatLogOutput(*cpy)
 	return cpy
 }
 
-// Log sends the (current log buffer + received "b") to the output driver for further handling.
+// Log sends the (current log buffer + received "b") to the output driver for further handling (logging).
 // The buffer is emptied and can be reused.
-// If an error occurs during writing, it panics.
+// If an error occurs during writing, it is logged to os.Stderr.
 func (l *Logger) Log(b []byte) {
 	l.buf = append(l.buf, b...)
-	err := l.outputDriver.Log(formatLogOutput(l))
+	formattedOutput := formatLogOutput(*l)
+	_, err := l.outputDriver.Write(append(formattedOutput, '\n'))
 	if err != nil {
-		panic(err)
+		//write the error encountered during writing to os.Stderr
+		//we could write to the log output driver because it implements the io.Writer,
+		//but if the output driver is fatally broken, the writing failure will be lost as well
+		//and debugging becomes more difficult.
+		fmt.Fprintf(os.Stderr, "failed to write log %s: %s\n", formattedOutput, err.Error())
 	}
 
 	l.buf = []byte{}
 }
 
 // TODO: enable config formatting
-func formatLogOutput(l *Logger) []byte {
+func formatLogOutput(l Logger) []byte {
 	//TIMESTAMP LEVEL METADATA BUFFER
 	timestamp := time.Now()
 
@@ -132,7 +138,6 @@ func formatLogOutput(l *Logger) []byte {
 	//very careful (whitespace)
 	out = append(out, meta2bytes...)
 	out = append(out, l.buf...)
-	out = append(out, '\n')
 
 	return out
 }

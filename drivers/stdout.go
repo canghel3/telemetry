@@ -9,7 +9,6 @@ func ToStdout() *Stdout {
 	return &Stdout{}
 }
 
-func (s *Stdout) Log(p []byte) error {
-	_, err := os.Stdout.Write(p)
-	return err
+func (s *Stdout) Write(p []byte) (int, error) {
+	return os.Stdout.Write(p)
 }
