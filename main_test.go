@@ -331,9 +331,11 @@ func TestOutputToFile(t *testing.T) {
 		ed := &errorDriver{}
 		log.OutputDriver(ed).Info().Log([]byte("schmeckermeister"))
 
-		_, err := os.OpenFile(os.Stderr.Name(), os.O_RDONLY, 0777)
-		assert.NilError(t, err)
+		//f, err := os.OpenFile(os.Stderr.Name(), os.O_RDONLY, 0777)
+		//assert.NilError(t, err)
+
 		read, err := os.ReadFile(os.Stderr.Name())
+		assert.NilError(t, err)
 
 		assert.NilError(t, err)
 		assert.Assert(t, bytes.Equal(read, []byte("failed to write log: intentional write error\n")))
