@@ -7,8 +7,6 @@ import (
 	"time"
 )
 
-//TODO: add global logger such that it is not required to define a Logger object every time?
-
 type Logger struct {
 	buf          []byte
 	level        level.Level
