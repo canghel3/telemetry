@@ -28,7 +28,7 @@ func main() {
 	tx.Append(toFile.Error().Msg([]byte("hallelujah")))
 	tx.Append(toFile.Info().Msg([]byte("marcele, la covrigarie!")))
 	tx.Append(log.Stdout().Msg([]byte("TO STDOUT!")))
-	tx.Commit()
+	tx.Log()
 
 	os.WriteFile(LOGFILE, nil, 0644)
 }
