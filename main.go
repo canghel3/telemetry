@@ -1,8 +1,11 @@
 package main
 
 import (
+	"fmt"
+	"github.com/spf13/viper"
 	"os"
 	"telemetry/log"
+	"telemetry/models"
 )
 
 type CustomDriver struct {
@@ -12,6 +15,20 @@ type CustomDriver struct {
 func (cd *CustomDriver) Write(p []byte) error {
 	cd.msg = string(p)
 	return nil
+}
+
+func init() {
+	viper.AddConfigPath("./")
+	viper.SetConfigName("config")
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Stdout().Error().Log([]byte(fmt.Sprintf("failed to read config: %s", err.Error())))
+	}
+
+	err = viper.Unmarshal(&models.PkgConfig)
+	if err != nil {
+		log.Stdout().Error().Log([]byte(fmt.Sprintf("failed to unmarshal config: %s", err.Error())))
+	}
 }
 
 // TODO: what remains to be done is configurable output (timestamp, field order, field label visiblity, disable implicit formatting)

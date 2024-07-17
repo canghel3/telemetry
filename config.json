@@ -10,7 +10,7 @@
       },
       "timestamp": ""
     },
-    "transaction" : {
+    "tx" : {
       "enabled": true,
       "field_order":  {
         "timestamp": 1,

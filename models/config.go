@@ -1,7 +1,7 @@
-package config
+package models
 
 type Config struct {
-	Formatting FormattingConfig `yaml:"formatting"`
+	Formatting FormattingConfig `mapstructure:"formatting"`
 }
 
 type FormattingConfig struct {
@@ -20,3 +20,5 @@ type TxConfig struct {
 	Timestamp  string         `mapstructure:"timestamp"`
 	FieldOrder map[string]int `mapstructure:"field_order"`
 }
+
+var PkgConfig Config
