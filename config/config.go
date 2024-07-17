@@ -1,18 +1,18 @@
-package models
+package config
 
-type Config struct {
+type PkgConfig struct {
 	Formatting FormattingConfig `mapstructure:"formatting"`
 }
 
 type FormattingConfig struct {
 	LogConfig LogConfig `mapstructure:"log"`
-	TxConfig  TxConfig  `mapstructure:"tx"`
+	TxConfig  TxConfig  `mapstructure:"transaction"`
 }
 
 type LogConfig struct {
-	Enabled    bool           `mapstructure:"enabled"`
-	Timestamp  string         `mapstructure:"timestamp"`
-	FieldOrder map[string]int `mapstructure:"field_order"`
+	FormattingEnabled bool           `mapstructure:"enabled"`
+	Timestamp         string         `mapstructure:"timestamp"`
+	FieldOrder        map[string]int `mapstructure:"field_order"`
 }
 
 type TxConfig struct {
@@ -21,4 +21,4 @@ type TxConfig struct {
 	FieldOrder map[string]int `mapstructure:"field_order"`
 }
 
-var PkgConfig Config
+var PkgConfiguration PkgConfig

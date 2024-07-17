@@ -1,6 +1,6 @@
 package drivers
 
-// OutputDriver adheres to io.Writer
+// OutputDriver is identical to io.Writer
 type OutputDriver interface {
 	Write([]byte) (int, error)
 }

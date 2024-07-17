@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/spf13/viper"
 	"os"
+	"telemetry/config"
 	"telemetry/log"
-	"telemetry/models"
 )
 
 type CustomDriver struct {
@@ -18,14 +18,18 @@ func (cd *CustomDriver) Write(p []byte) error {
 }
 
 func init() {
-	viper.AddConfigPath("./")
-	viper.SetConfigName("config")
-	err := viper.ReadInConfig()
+	v := viper.New()
+	v.AutomaticEnv()
+	v.SetEnvPrefix("TELEMETRY")
+	v.AddConfigPath("./")
+	v.SetConfigName("telemetry")
+	v.SetConfigType("json")
+	err := v.ReadInConfig()
 	if err != nil {
 		log.Stdout().Error().Log([]byte(fmt.Sprintf("failed to read config: %s", err.Error())))
 	}
 
-	err = viper.Unmarshal(&models.PkgConfig)
+	err = v.Unmarshal(&config.PkgConfiguration)
 	if err != nil {
 		log.Stdout().Error().Log([]byte(fmt.Sprintf("failed to unmarshal config: %s", err.Error())))
 	}
@@ -36,7 +40,8 @@ func init() {
 // write examples
 // solve TODOs
 func main() {
-	const LOGFILE = "./telemetry.log"
+	const logfile = "./telemetry.log"
+	const configFile = "./config.json"
 	log.Stdout().Error().Log([]byte("HELLO"))
 
 	stdout := log.Stdout()
@@ -44,12 +49,16 @@ func main() {
 	stdout.Error().Log([]byte("HELLO"))
 	stdout.Info().Log([]byte("WORLD"))
 
-	toFile := log.File(LOGFILE)
+	toFile := log.File(logfile)
 	tx := log.BeginTx()
 	tx.Append(toFile.Error().Msg([]byte("hallelujah")))
 	tx.Append(toFile.Info().Msg([]byte("marcele, la covrigarie!")))
 	tx.Append(log.Stdout().Msg([]byte("TO STDOUT!")))
 	tx.Log()
 
-	os.WriteFile(LOGFILE, nil, 0644)
+	stdoutWithSettings := log.Stdout()
+	stdoutWithSettings.Settings("./overwriter.json")
+	stdoutWithSettings.Log([]byte("salutare flacai"))
+
+	os.WriteFile(logfile, nil, 0644)
 }

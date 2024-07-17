@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/spf13/viper"
 	"os"
+	"telemetry/config"
 	"telemetry/drivers"
 	"telemetry/level"
-	"telemetry/models"
 	"time"
 )
 
@@ -15,53 +15,21 @@ type Logger struct {
 	level        level.Level
 	outputDriver drivers.OutputDriver
 	metadata     map[any]any
-	settings     Settings
+	config       config.PkgConfig
 }
 
-// TODO: implement settings being set from config file?
-type Settings struct {
-	logConfig models.LogConfig
-	txConfig  models.TxConfig
-}
-
-type SettingOption func(*Settings)
-
-func OptionFromConfig(configFile string) SettingOption {
-	return func(s *Settings) {
-		viper.SetConfigFile(configFile)
-		err := viper.ReadInConfig()
-		if err != nil {
-			Stdout().Error().Log([]byte(fmt.Sprintf("failed to read config: %s", err.Error())))
-		}
-
-		err = viper.Unmarshal(&models.PkgConfig)
-		if err != nil {
-			Stdout().Error().Log([]byte(fmt.Sprintf("failed to unmarshal config: %s", err.Error())))
-		}
-
-		//TODO: complete function
-		//ftVal := reflect.ValueOf(&models.PkgConfig).Elem()
-		//for i := 0; i < ftVal.NumField(); i++ {
-		//	field := ftVal.Type().Field(i)
-		//
-		//	if ftVal.Field(i).CanSet() {
-		//		ftVal.Field(i).Set(reflect.ValueOf(value))
-		//	} else {
-		//		Stdout().Warn().Log([]byte(fmt.Sprintf("failed to set field %s", field.Name)))
-		//	}
-		//}
+// Settings enables overwriting the logger instance configuration.
+func (l *Logger) Settings(file string) *Logger {
+	v := viper.New()
+	v.SetConfigFile(file)
+	err := v.ReadInConfig()
+	if err != nil {
+		Stdout().Error().Log([]byte(fmt.Sprintf("failed to read config: %s", err.Error())))
 	}
-}
 
-func LogFormattingOption(enabled bool) SettingOption {
-	return func(s *Settings) {
-		s.logConfig.Enabled = enabled
-	}
-}
-
-func (l *Logger) Settings(opts ...SettingOption) *Logger {
-	for _, opt := range opts {
-		opt(&l.settings)
+	err = v.Unmarshal(&l.config)
+	if err != nil {
+		Stdout().Error().Log([]byte(fmt.Sprintf("failed to unmarshal config: %s", err.Error())))
 	}
 
 	return l
@@ -69,11 +37,13 @@ func (l *Logger) Settings(opts ...SettingOption) *Logger {
 
 // Default initiates a Logger instance with a stdout driver and no log level.
 func Default() *Logger {
+	var cpy = config.PkgConfiguration
 	return &Logger{
 		outputDriver: drivers.ToStdout(),
 		metadata:     nil,
 		buf:          nil,
 		level:        level.None(),
+		config:       cpy,
 	}
 }
 
@@ -122,6 +92,8 @@ func (l *Logger) Metadata(data map[any]any) *Logger {
 // File initiates a Logger instance for logging to the specified file.
 func File(name string) *Logger {
 	l := Default()
+	var cpy = config.PkgConfiguration
+	l.config = cpy
 	l.outputDriver = drivers.ToFileWithName(name)
 	return l
 }
@@ -129,6 +101,8 @@ func File(name string) *Logger {
 // Stdout initiates a Logger instance for logging to stdout.
 func Stdout() *Logger {
 	l := Default()
+	var cpy = config.PkgConfiguration
+	l.config = cpy
 	l.outputDriver = drivers.ToStdout()
 	return l
 }
@@ -136,6 +110,8 @@ func Stdout() *Logger {
 // OutputDriver initiates a Logger instance for logging to a custom instance.
 func OutputDriver(driver drivers.OutputDriver) *Logger {
 	l := Default()
+	var cpy = config.PkgConfiguration
+	l.config = cpy
 	l.outputDriver = driver
 	return l
 }
@@ -154,20 +130,23 @@ func (l *Logger) Msg(b []byte) *Logger {
 	return cpy
 }
 
-// Log sends the (current log buffer + received "b") to the output driver for further handling (logging).
+// Log sends the current log buffer and the received "b" to the output driver for further handling.
 // The buffer is emptied and can be reused.
 // If an error occurs during writing, it is logged to os.Stderr.
 func (l *Logger) Log(b []byte) {
 	l.buf = append(l.buf, b...)
-	//TODO: disable formatting by config file
-	formattedOutput := formatLogOutput(*l)
-	_, err := l.outputDriver.Write(append(formattedOutput, '\n'))
+	var output = b
+	if l.config.Formatting.LogConfig.FormattingEnabled {
+		output = formatLogOutput(*l)
+	}
+
+	_, err := l.outputDriver.Write(append(output, '\n'))
 	if err != nil {
 		//write the error encountered during writing to os.Stderr
 		//we could write to the log output driver because it implements the io.Writer,
 		//but if the output driver is fatally broken, the writing failure will be lost as well
 		//and debugging becomes more difficult.
-		fmt.Fprintf(os.Stderr, "failed to write log %s: %s\n", formattedOutput, err.Error())
+		fmt.Fprintf(os.Stderr, "failed to write log %s: %s\n", output, err.Error())
 	}
 
 	l.buf = []byte{}

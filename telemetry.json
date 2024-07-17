@@ -1,16 +1,16 @@
 {
   "formatting": {
     "log" : {
-      "enabled": true,
+      "enabled": false,
       "field_order":  {
         "timestamp": 1,
         "level": 2,
         "metadata": 3,
         "buffer": 4
       },
-      "timestamp": ""
+      "timestamp": "2024-03-02"
     },
-    "tx" : {
+    "transaction" : {
       "enabled": true,
       "field_order":  {
         "timestamp": 1,
@@ -18,7 +18,7 @@
         "metadata": 3,
         "buffer": 4
       },
-      "timestamp": ""
+      "timestamp": "2024-03-02"
     }
   }
 }
