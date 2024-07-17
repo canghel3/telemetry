@@ -34,6 +34,7 @@ func init() {
 // TODO: what remains to be done is configurable output (timestamp, field order, field label visiblity, disable implicit formatting)
 // finish tests
 // write examples
+// solve TODOs
 func main() {
 	const LOGFILE = "./telemetry.log"
 	log.Stdout().Error().Log([]byte("HELLO"))

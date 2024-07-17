@@ -2,9 +2,11 @@ package log
 
 import (
 	"fmt"
+	"github.com/spf13/viper"
 	"os"
 	"telemetry/drivers"
 	"telemetry/level"
+	"telemetry/models"
 	"time"
 )
 
@@ -13,6 +15,56 @@ type Logger struct {
 	level        level.Level
 	outputDriver drivers.OutputDriver
 	metadata     map[any]any
+	settings     Settings
+}
+
+// TODO: implement settings being set from config file?
+type Settings struct {
+	logConfig models.LogConfig
+	txConfig  models.TxConfig
+}
+
+type SettingOption func(*Settings)
+
+func OptionFromConfig(configFile string) SettingOption {
+	return func(s *Settings) {
+		viper.SetConfigFile(configFile)
+		err := viper.ReadInConfig()
+		if err != nil {
+			Stdout().Error().Log([]byte(fmt.Sprintf("failed to read config: %s", err.Error())))
+		}
+
+		err = viper.Unmarshal(&models.PkgConfig)
+		if err != nil {
+			Stdout().Error().Log([]byte(fmt.Sprintf("failed to unmarshal config: %s", err.Error())))
+		}
+
+		//TODO: complete function
+		//ftVal := reflect.ValueOf(&models.PkgConfig).Elem()
+		//for i := 0; i < ftVal.NumField(); i++ {
+		//	field := ftVal.Type().Field(i)
+		//
+		//	if ftVal.Field(i).CanSet() {
+		//		ftVal.Field(i).Set(reflect.ValueOf(value))
+		//	} else {
+		//		Stdout().Warn().Log([]byte(fmt.Sprintf("failed to set field %s", field.Name)))
+		//	}
+		//}
+	}
+}
+
+func LogFormattingOption(enabled bool) SettingOption {
+	return func(s *Settings) {
+		s.logConfig.Enabled = enabled
+	}
+}
+
+func (l *Logger) Settings(opts ...SettingOption) *Logger {
+	for _, opt := range opts {
+		opt(&l.settings)
+	}
+
+	return l
 }
 
 // Default initiates a Logger instance with a stdout driver and no log level.
