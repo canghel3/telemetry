@@ -13,10 +13,6 @@ import (
 	"testing"
 )
 
-//1. Test output to file with all severity levels and random content
-//2. Test output to stdout with all severity levels and random content
-//3. Test output to custom driver with all severity levels and random content
-
 const file = "xyz.log"
 
 type errorDriver struct {
@@ -412,8 +408,6 @@ func TestOutputToStdout(t *testing.T) {
 
 			read.Reset()
 
-			expected = []byte(level.None().Type() + " " + string(moreContent) + "\n")
-
 			initial = os.Stdout
 			r, w, err = os.Pipe()
 			assert.NilError(t, err)
@@ -435,105 +429,220 @@ func TestOutputToStdout(t *testing.T) {
 		})
 
 		t.Run("ERROR LEVEL", func(t *testing.T) {
-			os.WriteFile(file, nil, 0600)
+			initial := os.Stdout
+			r, w, err := os.Pipe()
+			assert.NilError(t, err)
 
-			log.File(file).Error().Log(content)
+			os.Stdout = w
 
-			retrieved, err := os.ReadFile(file)
+			log.Stdout().Error().Log(content)
+
+			err = w.Close()
+			assert.NilError(t, err)
+
+			os.Stdout = initial
+
+			var read bytes.Buffer
+			_, err = io.Copy(&read, r)
 			assert.NilError(t, err)
 
 			expected := []byte(level.Error().Type() + " " + string(content) + "\n")
-			assert.Assert(t, bytes.Contains(retrieved, expected) == true)
+			assert.Assert(t, bytes.Contains(read.Bytes(), expected) == true)
 
-			log.File(file).Error().Log(moreContent)
+			read.Reset()
 
-			retrieved, err = os.ReadFile(file)
+			initial = os.Stdout
+			r, w, err = os.Pipe()
+			assert.NilError(t, err)
+
+			os.Stdout = w
+
+			log.Stdout().Error().Log(moreContent)
+
+			err = w.Close()
+			assert.NilError(t, err)
+
+			os.Stdout = initial
+
+			_, err = io.Copy(&read, r)
 			assert.NilError(t, err)
 
 			expected = []byte(level.Error().Type() + " " + string(moreContent) + "\n")
-			assert.Assert(t, bytes.Contains(retrieved, expected) == true)
+			assert.Assert(t, bytes.Contains(read.Bytes(), expected) == true)
 		})
 
 		t.Run("WARN LEVEL", func(t *testing.T) {
-			os.WriteFile(file, nil, 0600)
+			initial := os.Stdout
+			r, w, err := os.Pipe()
+			assert.NilError(t, err)
 
-			log.File(file).Warn().Log(content)
+			os.Stdout = w
 
-			retrieved, err := os.ReadFile(file)
+			log.Stdout().Warn().Log(content)
+
+			err = w.Close()
+			assert.NilError(t, err)
+
+			os.Stdout = initial
+
+			var read bytes.Buffer
+			_, err = io.Copy(&read, r)
 			assert.NilError(t, err)
 
 			expected := []byte(level.Warn().Type() + " " + string(content) + "\n")
-			assert.Assert(t, bytes.Contains(retrieved, expected) == true)
+			assert.Assert(t, bytes.Contains(read.Bytes(), expected) == true)
 
-			log.File(file).Warn().Log(moreContent)
+			read.Reset()
 
-			retrieved, err = os.ReadFile(file)
+			initial = os.Stdout
+			r, w, err = os.Pipe()
+			assert.NilError(t, err)
+
+			os.Stdout = w
+
+			log.Stdout().Warn().Log(moreContent)
+
+			err = w.Close()
+			assert.NilError(t, err)
+
+			os.Stdout = initial
+
+			_, err = io.Copy(&read, r)
 			assert.NilError(t, err)
 
 			expected = []byte(level.Warn().Type() + " " + string(moreContent) + "\n")
-			assert.Assert(t, bytes.Contains(retrieved, expected) == true)
+			assert.Assert(t, bytes.Contains(read.Bytes(), expected) == true)
 		})
 
 		t.Run("INFO LEVEL", func(t *testing.T) {
-			os.WriteFile(file, nil, 0600)
+			initial := os.Stdout
+			r, w, err := os.Pipe()
+			assert.NilError(t, err)
 
-			log.File(file).Info().Log(content)
+			os.Stdout = w
 
-			retrieved, err := os.ReadFile(file)
+			log.Stdout().Info().Log(content)
+
+			err = w.Close()
+			assert.NilError(t, err)
+
+			os.Stdout = initial
+
+			var read bytes.Buffer
+			_, err = io.Copy(&read, r)
 			assert.NilError(t, err)
 
 			expected := []byte(level.Info().Type() + " " + string(content) + "\n")
-			assert.Assert(t, bytes.Contains(retrieved, expected) == true)
+			assert.Assert(t, bytes.Contains(read.Bytes(), expected) == true)
 
-			log.File(file).Info().Log(moreContent)
+			read.Reset()
 
-			retrieved, err = os.ReadFile(file)
+			initial = os.Stdout
+			r, w, err = os.Pipe()
+			assert.NilError(t, err)
+
+			os.Stdout = w
+
+			log.Stdout().Info().Log(moreContent)
+
+			err = w.Close()
+			assert.NilError(t, err)
+
+			os.Stdout = initial
+
+			_, err = io.Copy(&read, r)
 			assert.NilError(t, err)
 
 			expected = []byte(level.Info().Type() + " " + string(moreContent) + "\n")
-			assert.Assert(t, bytes.Contains(retrieved, expected) == true)
+			assert.Assert(t, bytes.Contains(read.Bytes(), expected) == true)
 		})
 
 		t.Run("DEBUG LEVEL", func(t *testing.T) {
-			os.WriteFile(file, nil, 0600)
+			initial := os.Stdout
+			r, w, err := os.Pipe()
+			assert.NilError(t, err)
 
-			log.File(file).Debug().Log(content)
+			os.Stdout = w
 
-			retrieved, err := os.ReadFile(file)
+			log.Stdout().Debug().Log(content)
+
+			err = w.Close()
+			assert.NilError(t, err)
+
+			os.Stdout = initial
+
+			var read bytes.Buffer
+			_, err = io.Copy(&read, r)
 			assert.NilError(t, err)
 
 			expected := []byte(level.Debug().Type() + " " + string(content) + "\n")
-			assert.Assert(t, bytes.Contains(retrieved, expected) == true)
+			assert.Assert(t, bytes.Contains(read.Bytes(), expected) == true)
 
-			log.File(file).Debug().Log(moreContent)
+			read.Reset()
 
-			retrieved, err = os.ReadFile(file)
+			initial = os.Stdout
+			r, w, err = os.Pipe()
+			assert.NilError(t, err)
+
+			os.Stdout = w
+
+			log.Stdout().Debug().Log(moreContent)
+
+			err = w.Close()
+			assert.NilError(t, err)
+
+			os.Stdout = initial
+
+			_, err = io.Copy(&read, r)
 			assert.NilError(t, err)
 
 			expected = []byte(level.Debug().Type() + " " + string(moreContent) + "\n")
-			assert.Assert(t, bytes.Contains(retrieved, expected) == true)
+			assert.Assert(t, bytes.Contains(read.Bytes(), expected) == true)
 		})
 
 		t.Run("CUSTOM LEVEL", func(t *testing.T) {
-			os.WriteFile(file, nil, 0600)
-
 			criticalLevel := level.Custom("CRITICAL")
 
-			log.File(file).Level(criticalLevel).Log(content)
+			initial := os.Stdout
+			r, w, err := os.Pipe()
+			assert.NilError(t, err)
 
-			retrieved, err := os.ReadFile(file)
+			os.Stdout = w
+
+			log.Stdout().Level(criticalLevel).Log(content)
+
+			err = w.Close()
+			assert.NilError(t, err)
+
+			os.Stdout = initial
+
+			var read bytes.Buffer
+			_, err = io.Copy(&read, r)
 			assert.NilError(t, err)
 
 			expected := []byte(criticalLevel.Type() + " " + string(content) + "\n")
-			assert.Assert(t, bytes.Contains(retrieved, expected) == true)
+			assert.Assert(t, bytes.Contains(read.Bytes(), expected) == true)
 
-			log.File(file).Level(criticalLevel).Log(moreContent)
+			read.Reset()
 
-			retrieved, err = os.ReadFile(file)
+			initial = os.Stdout
+			r, w, err = os.Pipe()
+			assert.NilError(t, err)
+
+			os.Stdout = w
+
+			log.Stdout().Level(criticalLevel).Log(moreContent)
+
+			err = w.Close()
+			assert.NilError(t, err)
+
+			os.Stdout = initial
+
+			_, err = io.Copy(&read, r)
 			assert.NilError(t, err)
 
 			expected = []byte(criticalLevel.Type() + " " + string(moreContent) + "\n")
-			assert.Assert(t, bytes.Contains(retrieved, expected) == true)
+			assert.Assert(t, bytes.Contains(read.Bytes(), expected) == true)
 		})
 	})
 
@@ -699,6 +808,46 @@ func TestOutputToStdout(t *testing.T) {
 
 	})
 
+	t.Run("CONCURRENT WRITING TO STDOUT", func(t *testing.T) {
+		wg := sync.WaitGroup{}
+		//launch 100 goroutines to write to the same file
+		for i := 0; i < 100; i++ {
+			wg.Add(1)
+			content := []byte("some content " + strconv.Itoa(i))
+			go func() {
+				defer wg.Done()
+				toStdout := log.Stdout()
+				toStdout.Info().Log(content)
+			}()
+		}
+
+		wg.Wait()
+	})
+
+	t.Run("NIL CONTENT", func(t *testing.T) {
+		initial := os.Stdout
+		r, w, err := os.Pipe()
+		assert.NilError(t, err)
+
+		os.Stdout = w
+
+		log.Stdout().Info().Log(nil)
+
+		err = w.Close()
+		assert.NilError(t, err)
+
+		os.Stdout = initial
+
+		var read bytes.Buffer
+		_, err = io.Copy(&read, r)
+		assert.NilError(t, err)
+
+		expected := []byte(level.Info().Type() + " \n")
+		assert.Assert(t, bytes.Contains(read.Bytes(), expected) == true)
+	})
+}
+
+func TestOutputToCustom(t *testing.T) {
 	t.Run("FAILED TO WRITE LOG", func(t *testing.T) {
 		t.SkipNow()
 		ed := &errorDriver{}
@@ -713,36 +862,4 @@ func TestOutputToStdout(t *testing.T) {
 		assert.NilError(t, err)
 		assert.Assert(t, bytes.Equal(read, []byte("failed to write log: intentional write error\n")))
 	})
-
-	t.Run("CONCURRENT WRITING TO THE SAME FILE", func(t *testing.T) {
-		os.WriteFile(file, nil, 0600)
-
-		wg := sync.WaitGroup{}
-		//launch 100 goroutines to write to the same file
-		for i := 0; i < 100; i++ {
-			wg.Add(1)
-			content := []byte("some content " + strconv.Itoa(i))
-			go func() {
-				defer wg.Done()
-				toFile := log.File(file)
-				toFile.Info().Log(content)
-			}()
-		}
-
-		wg.Wait()
-	})
-
-	t.Run("NIL CONTENT", func(t *testing.T) {
-		os.WriteFile(file, nil, 0600)
-
-		log.File(file).Info().Log(nil)
-
-		retrieved, err := os.ReadFile(file)
-		assert.NilError(t, err)
-
-		expected := []byte(level.Info().Type() + " \n")
-		assert.Assert(t, bytes.Contains(retrieved, expected) == true)
-	})
-
-	os.WriteFile(file, nil, 0600)
 }

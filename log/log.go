@@ -107,6 +107,7 @@ func (l *Logger) Msg(b []byte) *Logger {
 // If an error occurs during writing, it is logged to os.Stderr.
 func (l *Logger) Log(b []byte) {
 	l.buf = append(l.buf, b...)
+	//TODO: disable formatting by config file
 	formattedOutput := formatLogOutput(*l)
 	_, err := l.outputDriver.Write(append(formattedOutput, '\n'))
 	if err != nil {
