@@ -21,7 +21,7 @@ toFile.Error().Log([]byte("encountered error"))
 
 ```go
 //Logging in-line
-log.Stdout(filename).Info().Log([]byte("hello, world!"))
+log.Stdout().Info().Log([]byte("hello, world!"))
 
 //Reusing the same logger
 stdout := log.Stdout(filename)
