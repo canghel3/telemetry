@@ -52,14 +52,14 @@ func main() {
 
 	toFile := log.File(logfile)
 	tx := log.BeginTx()
-	tx.Append(toFile.Error().Msg([]byte("hallelujah")))
+	tx.Append(toFile.Error().Msg([]byte("something is going on")))
 	tx.Append(toFile.Info().Msg([]byte("marcele, la covrigarie!")))
 	tx.Append(log.Stdout().Msg([]byte("TO STDOUT!")))
 	tx.Log()
 
 	stdoutWithSettings := log.Stdout()
 	stdoutWithSettings.Settings("./overwriter.json")
-	stdoutWithSettings.Log([]byte("salutare flacai"))
+	stdoutWithSettings.Log([]byte("inghetata de fistic"))
 
 	os.WriteFile(logfile, nil, 0644)
 }

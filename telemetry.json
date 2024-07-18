@@ -8,7 +8,7 @@
         "metadata": 3,
         "buffer": 4
       },
-      "timestamp": "2024-03-02"
+      "timestamp": "2006-01-02 15:04:05"
     },
     "transaction" : {
       "disabled": false,
@@ -18,7 +18,7 @@
         "metadata": 3,
         "buffer": 4
       },
-      "timestamp": "2024-03-02"
+      "timestamp": "2006-01-02 15:04:05"
     }
   }
 }
