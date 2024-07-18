@@ -35,9 +35,7 @@ func init() {
 	}
 }
 
-// TODO: what remains to be done is configurable output (timestamp, field order, field label visiblity, disable implicit formatting)
-// finish tests
-// write examples
+// formatting is very basic, but not vital for proper functionality
 // solve TODOs
 func main() {
 	const logfile = "./telemetry.log"
@@ -45,6 +43,9 @@ func main() {
 	log.Stdout().Error().Log([]byte("HELLO"))
 
 	stdout := log.Stdout()
+
+	stdout.Metadata(map[any]any{"something": "clean"})
+	stdout.Info().Log(nil)
 
 	stdout.Error().Log([]byte("HELLO"))
 	stdout.Info().Log([]byte("WORLD"))

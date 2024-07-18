@@ -1,4 +1,4 @@
-package main
+package log
 
 import (
 	"bytes"
@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"sync"
 	"telemetry/level"
-	"telemetry/log"
 	"testing"
 )
 
@@ -35,6 +34,25 @@ func (cl *customLevel) Type() string {
 	return cl.levelType
 }
 
+func ExampleFile() {
+	File("./testdata/out.log").Info().Log([]byte("Foo"))
+
+	toFile := File("./testdata/out.log")
+	toFile.Info().Log([]byte("Bar"))
+}
+
+func ExampleStdout() {
+	Stdout().Info().Log([]byte("Foo"))
+
+	stdout := Stdout()
+	stdout.Info().Log([]byte("Bar"))
+}
+
+func ExampleOutputDriver() {
+	OutputDriver(os.Stdout).Info().Log([]byte("Foo"))
+	OutputDriver(os.Stderr).Info().Log([]byte("Bar"))
+}
+
 func TestOutputToFile(t *testing.T) {
 	_, err := os.Create(file)
 	assert.NilError(t, err)
@@ -46,7 +64,7 @@ func TestOutputToFile(t *testing.T) {
 		t.Run("NO LEVEL", func(t *testing.T) {
 			os.WriteFile(file, nil, 0600)
 
-			log.File(file).NoLevel().Log(content)
+			File(file).NoLevel().Log(content)
 
 			retrieved, err := os.ReadFile(file)
 			assert.NilError(t, err)
@@ -54,7 +72,7 @@ func TestOutputToFile(t *testing.T) {
 			expected := []byte(level.None().Type() + " " + string(content) + "\n")
 			assert.Assert(t, bytes.Contains(retrieved, expected) == true)
 
-			log.File(file).NoLevel().Log(moreContent)
+			File(file).NoLevel().Log(moreContent)
 
 			retrieved, err = os.ReadFile(file)
 			assert.NilError(t, err)
@@ -66,7 +84,7 @@ func TestOutputToFile(t *testing.T) {
 		t.Run("ERROR LEVEL", func(t *testing.T) {
 			os.WriteFile(file, nil, 0600)
 
-			log.File(file).Error().Log(content)
+			File(file).Error().Log(content)
 
 			retrieved, err := os.ReadFile(file)
 			assert.NilError(t, err)
@@ -74,7 +92,7 @@ func TestOutputToFile(t *testing.T) {
 			expected := []byte(level.Error().Type() + " " + string(content) + "\n")
 			assert.Assert(t, bytes.Contains(retrieved, expected) == true)
 
-			log.File(file).Error().Log(moreContent)
+			File(file).Error().Log(moreContent)
 
 			retrieved, err = os.ReadFile(file)
 			assert.NilError(t, err)
@@ -86,7 +104,7 @@ func TestOutputToFile(t *testing.T) {
 		t.Run("WARN LEVEL", func(t *testing.T) {
 			os.WriteFile(file, nil, 0600)
 
-			log.File(file).Warn().Log(content)
+			File(file).Warn().Log(content)
 
 			retrieved, err := os.ReadFile(file)
 			assert.NilError(t, err)
@@ -94,7 +112,7 @@ func TestOutputToFile(t *testing.T) {
 			expected := []byte(level.Warn().Type() + " " + string(content) + "\n")
 			assert.Assert(t, bytes.Contains(retrieved, expected) == true)
 
-			log.File(file).Warn().Log(moreContent)
+			File(file).Warn().Log(moreContent)
 
 			retrieved, err = os.ReadFile(file)
 			assert.NilError(t, err)
@@ -106,7 +124,7 @@ func TestOutputToFile(t *testing.T) {
 		t.Run("INFO LEVEL", func(t *testing.T) {
 			os.WriteFile(file, nil, 0600)
 
-			log.File(file).Info().Log(content)
+			File(file).Info().Log(content)
 
 			retrieved, err := os.ReadFile(file)
 			assert.NilError(t, err)
@@ -114,7 +132,7 @@ func TestOutputToFile(t *testing.T) {
 			expected := []byte(level.Info().Type() + " " + string(content) + "\n")
 			assert.Assert(t, bytes.Contains(retrieved, expected) == true)
 
-			log.File(file).Info().Log(moreContent)
+			File(file).Info().Log(moreContent)
 
 			retrieved, err = os.ReadFile(file)
 			assert.NilError(t, err)
@@ -126,7 +144,7 @@ func TestOutputToFile(t *testing.T) {
 		t.Run("DEBUG LEVEL", func(t *testing.T) {
 			os.WriteFile(file, nil, 0600)
 
-			log.File(file).Debug().Log(content)
+			File(file).Debug().Log(content)
 
 			retrieved, err := os.ReadFile(file)
 			assert.NilError(t, err)
@@ -134,7 +152,7 @@ func TestOutputToFile(t *testing.T) {
 			expected := []byte(level.Debug().Type() + " " + string(content) + "\n")
 			assert.Assert(t, bytes.Contains(retrieved, expected) == true)
 
-			log.File(file).Debug().Log(moreContent)
+			File(file).Debug().Log(moreContent)
 
 			retrieved, err = os.ReadFile(file)
 			assert.NilError(t, err)
@@ -148,7 +166,7 @@ func TestOutputToFile(t *testing.T) {
 
 			criticalLevel := level.Custom("CRITICAL")
 
-			log.File(file).Level(criticalLevel).Log(content)
+			File(file).Level(criticalLevel).Log(content)
 
 			retrieved, err := os.ReadFile(file)
 			assert.NilError(t, err)
@@ -156,7 +174,7 @@ func TestOutputToFile(t *testing.T) {
 			expected := []byte(criticalLevel.Type() + " " + string(content) + "\n")
 			assert.Assert(t, bytes.Contains(retrieved, expected) == true)
 
-			log.File(file).Level(criticalLevel).Log(moreContent)
+			File(file).Level(criticalLevel).Log(moreContent)
 
 			retrieved, err = os.ReadFile(file)
 			assert.NilError(t, err)
@@ -174,8 +192,8 @@ func TestOutputToFile(t *testing.T) {
 		t.Run("VERBOSE", func(t *testing.T) {
 			os.WriteFile(file, nil, 0600)
 
-			toFile := log.File(file)
-			tx := log.BeginTx()
+			toFile := File(file)
+			tx := BeginTx()
 			tx.Append(toFile.Info().Msg(l1))
 			tx.Append(toFile.Level(level.Custom("MAJOR")).Msg(l2))
 			tx.Append(toFile.Warn().Msg(l3))
@@ -195,10 +213,10 @@ func TestOutputToFile(t *testing.T) {
 		t.Run("IN-LINE", func(t *testing.T) {
 			os.WriteFile(file, nil, 0600)
 
-			tx := log.BeginTx()
-			tx.Append(log.File(file).Debug().Msg(l1))
-			tx.Append(log.File(file).NoLevel().Msg(l2))
-			tx.Append(log.File(file).Warn().Msg(l3))
+			tx := BeginTx()
+			tx.Append(File(file).Debug().Msg(l1))
+			tx.Append(File(file).NoLevel().Msg(l2))
+			tx.Append(File(file).Warn().Msg(l3))
 			tx.Log()
 
 			retrieved, err := os.ReadFile(file)
@@ -215,11 +233,11 @@ func TestOutputToFile(t *testing.T) {
 		t.Run("MIXED OUTPUTS", func(t *testing.T) {
 			os.WriteFile(file, nil, 0600)
 
-			toFile := log.File(file)
-			tx := log.BeginTx()
+			toFile := File(file)
+			tx := BeginTx()
 			tx.Append(toFile.Info().Msg(l1))
 			tx.Append(toFile.Level(level.Custom("MAJOR")).Msg(l2))
-			tx.Append(log.Stdout().Warn().Msg(l3))
+			tx.Append(Stdout().Warn().Msg(l3))
 			tx.Log()
 
 			retrieved, err := os.ReadFile(file)
@@ -234,7 +252,6 @@ func TestOutputToFile(t *testing.T) {
 		})
 
 		t.Run("WITH METADATA", func(t *testing.T) {
-			t.SkipNow()
 			os.WriteFile(file, nil, 0600)
 
 			meta := map[any]any{
@@ -243,11 +260,11 @@ func TestOutputToFile(t *testing.T) {
 				3.14159: imag(complex(1, 1)),
 			}
 
-			toFile := log.File(file)
-			tx := log.BeginTxWithMetadata(meta)
+			toFile := File(file)
+			tx := BeginTxWithMetadata(meta)
 			tx.Append(toFile.Info().Msg(l1))
 			tx.Append(toFile.Level(level.Custom("MAJOR")).Msg(l2))
-			tx.Append(log.Stdout().Warn().Msg(l3))
+			tx.Append(Stdout().Warn().Msg(l3))
 			tx.Log()
 
 			retrieved, err := os.ReadFile(file)
@@ -262,17 +279,34 @@ func TestOutputToFile(t *testing.T) {
 		})
 
 		t.Run("LOG", func(t *testing.T) {
-			t.SkipNow()
+			os.WriteFile(file, nil, 0600)
+
+			toFile := File(file)
+			tx := BeginTx()
+			tx.Append(toFile.Info().Msg(l1))
+			tx.Append(toFile.Level(level.Custom("MAJOR")).Msg(l2))
+			tx.Append(Stdout().Warn().Msg(l3))
+			tx.Log()
+
+			retrieved, err := os.ReadFile(file)
+			assert.NilError(t, err)
+
+			expected1 := []byte(level.Info().Type() + " " + string(l1) + "\n")
+			expected2 := []byte(level.Custom("MAJOR").Type() + " " + string(l2) + "\n")
+			expected3 := []byte(level.Warn().Type() + " " + string(l3) + "\n")
+			assert.Assert(t, bytes.Contains(retrieved, expected1) == true)
+			assert.Assert(t, bytes.Contains(retrieved, expected2) == true)
+			assert.Assert(t, bytes.Contains(retrieved, expected3) == false)
 		})
 
 		t.Run("DID NOT COMMIT", func(t *testing.T) {
 			os.WriteFile(file, nil, 0600)
 
-			toFile := log.File(file)
-			tx := log.BeginTx()
+			toFile := File(file)
+			tx := BeginTx()
 			tx.Append(toFile.Info().Msg(l1))
 			tx.Append(toFile.Level(level.Custom("MAJOR")).Msg(l2))
-			tx.Append(log.Stdout().Warn().Msg(l3))
+			tx.Append(Stdout().Warn().Msg(l3))
 
 			retrieved, err := os.ReadFile(file)
 			assert.NilError(t, err)
@@ -283,44 +317,16 @@ func TestOutputToFile(t *testing.T) {
 		t.Run("ROLLBACK", func(t *testing.T) {
 			os.WriteFile(file, nil, 0600)
 
-			toFile := log.File(file)
-			tx := log.BeginTx()
+			toFile := File(file)
+			tx := BeginTx()
 			tx.Append(toFile.Info().Msg(l1))
 			tx.Append(toFile.Level(level.Custom("MAJOR")).Msg(l2))
-			tx.Append(log.Stdout().Warn().Msg(l3))
+			tx.Append(Stdout().Warn().Msg(l3))
 
 			retrieved, err := os.ReadFile(file)
 			assert.NilError(t, err)
 
 			assert.Assert(t, len(retrieved) == 0)
-		})
-
-		t.Run("ALREADY COMMITED", func(t *testing.T) {
-			os.WriteFile(file, nil, 0600)
-
-			toFile := log.File(file)
-			tx := log.BeginTx()
-			tx.Append(toFile.Info().Msg(l1))
-			tx.Append(toFile.Level(level.Custom("MAJOR")).Msg(l2))
-			tx.Append(toFile.Warn().Msg(l3))
-			tx.Commit()
-			err = tx.Commit()
-
-			assert.Error(t, err, "transaction already committed or rolled back")
-		})
-
-		t.Run("ALREADY ROLLED BACK", func(t *testing.T) {
-			os.WriteFile(file, nil, 0600)
-
-			toFile := log.File(file)
-			tx := log.BeginTx()
-			tx.Append(toFile.Info().Msg(l1))
-			tx.Append(toFile.Level(level.Custom("MAJOR")).Msg(l2))
-			tx.Append(toFile.Warn().Msg(l3))
-			tx.Rollback()
-			err := tx.Rollback()
-
-			assert.Error(t, err, "transaction already committed or rolled back")
 		})
 	})
 
@@ -335,7 +341,7 @@ func TestOutputToFile(t *testing.T) {
 		os.Stderr = w
 
 		ed := &errorDriver{}
-		log.OutputDriver(ed).Info().Log([]byte("schmeckermeister"))
+		OutputDriver(ed).Info().Log([]byte("schmeckermeister"))
 
 		err = w.Close()
 		assert.NilError(t, err)
@@ -357,7 +363,7 @@ func TestOutputToFile(t *testing.T) {
 			content := []byte("some content " + strconv.Itoa(i))
 			go func() {
 				defer wg.Done()
-				toFile := log.File(file)
+				toFile := File(file)
 				toFile.Info().Log(content)
 			}()
 		}
@@ -368,7 +374,7 @@ func TestOutputToFile(t *testing.T) {
 	t.Run("NIL CONTENT", func(t *testing.T) {
 		os.WriteFile(file, nil, 0600)
 
-		log.File(file).Info().Log(nil)
+		File(file).Info().Log(nil)
 
 		retrieved, err := os.ReadFile(file)
 		assert.NilError(t, err)
@@ -392,7 +398,7 @@ func TestOutputToStdout(t *testing.T) {
 
 			os.Stdout = w
 
-			log.Stdout().NoLevel().Log(content)
+			Stdout().NoLevel().Log(content)
 
 			err = w.Close()
 			assert.NilError(t, err)
@@ -414,7 +420,7 @@ func TestOutputToStdout(t *testing.T) {
 
 			os.Stdout = w
 
-			log.Stdout().NoLevel().Log(moreContent)
+			Stdout().NoLevel().Log(moreContent)
 
 			err = w.Close()
 			assert.NilError(t, err)
@@ -435,7 +441,7 @@ func TestOutputToStdout(t *testing.T) {
 
 			os.Stdout = w
 
-			log.Stdout().Error().Log(content)
+			Stdout().Error().Log(content)
 
 			err = w.Close()
 			assert.NilError(t, err)
@@ -457,7 +463,7 @@ func TestOutputToStdout(t *testing.T) {
 
 			os.Stdout = w
 
-			log.Stdout().Error().Log(moreContent)
+			Stdout().Error().Log(moreContent)
 
 			err = w.Close()
 			assert.NilError(t, err)
@@ -478,7 +484,7 @@ func TestOutputToStdout(t *testing.T) {
 
 			os.Stdout = w
 
-			log.Stdout().Warn().Log(content)
+			Stdout().Warn().Log(content)
 
 			err = w.Close()
 			assert.NilError(t, err)
@@ -500,7 +506,7 @@ func TestOutputToStdout(t *testing.T) {
 
 			os.Stdout = w
 
-			log.Stdout().Warn().Log(moreContent)
+			Stdout().Warn().Log(moreContent)
 
 			err = w.Close()
 			assert.NilError(t, err)
@@ -521,7 +527,7 @@ func TestOutputToStdout(t *testing.T) {
 
 			os.Stdout = w
 
-			log.Stdout().Info().Log(content)
+			Stdout().Info().Log(content)
 
 			err = w.Close()
 			assert.NilError(t, err)
@@ -543,7 +549,7 @@ func TestOutputToStdout(t *testing.T) {
 
 			os.Stdout = w
 
-			log.Stdout().Info().Log(moreContent)
+			Stdout().Info().Log(moreContent)
 
 			err = w.Close()
 			assert.NilError(t, err)
@@ -564,7 +570,7 @@ func TestOutputToStdout(t *testing.T) {
 
 			os.Stdout = w
 
-			log.Stdout().Debug().Log(content)
+			Stdout().Debug().Log(content)
 
 			err = w.Close()
 			assert.NilError(t, err)
@@ -586,7 +592,7 @@ func TestOutputToStdout(t *testing.T) {
 
 			os.Stdout = w
 
-			log.Stdout().Debug().Log(moreContent)
+			Stdout().Debug().Log(moreContent)
 
 			err = w.Close()
 			assert.NilError(t, err)
@@ -609,7 +615,7 @@ func TestOutputToStdout(t *testing.T) {
 
 			os.Stdout = w
 
-			log.Stdout().Level(criticalLevel).Log(content)
+			Stdout().Level(criticalLevel).Log(content)
 
 			err = w.Close()
 			assert.NilError(t, err)
@@ -631,7 +637,7 @@ func TestOutputToStdout(t *testing.T) {
 
 			os.Stdout = w
 
-			log.Stdout().Level(criticalLevel).Log(moreContent)
+			Stdout().Level(criticalLevel).Log(moreContent)
 
 			err = w.Close()
 			assert.NilError(t, err)
@@ -652,65 +658,64 @@ func TestOutputToStdout(t *testing.T) {
 		l3 := []byte("I LIVE, I DIE, I LIVE AGAIN. WITNESS ME GOING TO VALHALLA!")
 
 		t.Run("VERBOSE", func(t *testing.T) {
-			os.WriteFile(file, nil, 0600)
+			initial := os.Stdout
+			r, w, err := os.Pipe()
+			assert.NilError(t, err)
 
-			toFile := log.File(file)
-			tx := log.BeginTx()
+			os.Stdout = w
+
+			toFile := Stdout()
+			tx := BeginTx()
 			tx.Append(toFile.Info().Msg(l1))
 			tx.Append(toFile.Level(level.Custom("MAJOR")).Msg(l2))
 			tx.Append(toFile.Warn().Msg(l3))
 			tx.Log()
 
-			retrieved, err := os.ReadFile(file)
+			err = w.Close()
+			assert.NilError(t, err)
+
+			os.Stdout = initial
+
+			var read bytes.Buffer
+			_, err = io.Copy(&read, r)
 			assert.NilError(t, err)
 
 			expected1 := []byte(level.Info().Type() + " " + string(l1) + "\n")
 			expected2 := []byte(level.Custom("MAJOR").Type() + " " + string(l2) + "\n")
 			expected3 := []byte(level.Warn().Type() + " " + string(l3) + "\n")
-			assert.Assert(t, bytes.Contains(retrieved, expected1) == true)
-			assert.Assert(t, bytes.Contains(retrieved, expected2) == true)
-			assert.Assert(t, bytes.Contains(retrieved, expected3) == true)
+			assert.Assert(t, bytes.Contains(read.Bytes(), expected1) == true)
+			assert.Assert(t, bytes.Contains(read.Bytes(), expected2) == true)
+			assert.Assert(t, bytes.Contains(read.Bytes(), expected3) == true)
 		})
 
 		t.Run("IN-LINE", func(t *testing.T) {
-			os.WriteFile(file, nil, 0600)
+			initial := os.Stdout
+			r, w, err := os.Pipe()
+			assert.NilError(t, err)
 
-			tx := log.BeginTx()
-			tx.Append(log.File(file).Debug().Msg(l1))
-			tx.Append(log.File(file).NoLevel().Msg(l2))
-			tx.Append(log.File(file).Warn().Msg(l3))
+			os.Stdout = w
+
+			tx := BeginTx()
+			tx.Append(Stdout().Debug().Msg(l1))
+			tx.Append(Stdout().NoLevel().Msg(l2))
+			tx.Append(Stdout().Warn().Msg(l3))
 			tx.Log()
 
-			retrieved, err := os.ReadFile(file)
+			err = w.Close()
+			assert.NilError(t, err)
+
+			os.Stdout = initial
+
+			var read bytes.Buffer
+			_, err = io.Copy(&read, r)
 			assert.NilError(t, err)
 
 			expected1 := []byte(level.Debug().Type() + " " + string(l1) + "\n")
 			expected2 := []byte(level.None().Type() + " " + string(l2) + "\n")
 			expected3 := []byte(level.Warn().Type() + " " + string(l3) + "\n")
-			assert.Assert(t, bytes.Contains(retrieved, expected1) == true)
-			assert.Assert(t, bytes.Contains(retrieved, expected2) == true)
-			assert.Assert(t, bytes.Contains(retrieved, expected3) == true)
-		})
-
-		t.Run("MIXED OUTPUTS", func(t *testing.T) {
-			os.WriteFile(file, nil, 0600)
-
-			toFile := log.File(file)
-			tx := log.BeginTx()
-			tx.Append(toFile.Info().Msg(l1))
-			tx.Append(toFile.Level(level.Custom("MAJOR")).Msg(l2))
-			tx.Append(log.Stdout().Warn().Msg(l3))
-			tx.Log()
-
-			retrieved, err := os.ReadFile(file)
-			assert.NilError(t, err)
-
-			expected1 := []byte(level.Info().Type() + " " + string(l1) + "\n")
-			expected2 := []byte(level.Custom("MAJOR").Type() + " " + string(l2) + "\n")
-			expected3 := []byte(level.Warn().Type() + " " + string(l3) + "\n")
-			assert.Assert(t, bytes.Contains(retrieved, expected1) == true)
-			assert.Assert(t, bytes.Contains(retrieved, expected2) == true)
-			assert.Assert(t, bytes.Contains(retrieved, expected3) == false)
+			assert.Assert(t, bytes.Contains(read.Bytes(), expected1) == true)
+			assert.Assert(t, bytes.Contains(read.Bytes(), expected2) == true)
+			assert.Assert(t, bytes.Contains(read.Bytes(), expected3) == true)
 		})
 
 		t.Run("WITH METADATA", func(t *testing.T) {
@@ -723,11 +728,11 @@ func TestOutputToStdout(t *testing.T) {
 				3.14159: imag(complex(1, 1)),
 			}
 
-			toFile := log.File(file)
-			tx := log.BeginTxWithMetadata(meta)
+			toFile := File(file)
+			tx := BeginTxWithMetadata(meta)
 			tx.Append(toFile.Info().Msg(l1))
 			tx.Append(toFile.Level(level.Custom("MAJOR")).Msg(l2))
-			tx.Append(log.Stdout().Warn().Msg(l3))
+			tx.Append(Stdout().Warn().Msg(l3))
 			tx.Log()
 
 			retrieved, err := os.ReadFile(file)
@@ -741,71 +746,33 @@ func TestOutputToStdout(t *testing.T) {
 			assert.Assert(t, bytes.Contains(retrieved, expected3) == false)
 		})
 
-		t.Run("LOG", func(t *testing.T) {
-			t.SkipNow()
-		})
-
-		t.Run("DID NOT COMMIT", func(t *testing.T) {
-			os.WriteFile(file, nil, 0600)
-
-			toFile := log.File(file)
-			tx := log.BeginTx()
-			tx.Append(toFile.Info().Msg(l1))
-			tx.Append(toFile.Level(level.Custom("MAJOR")).Msg(l2))
-			tx.Append(log.Stdout().Warn().Msg(l3))
-
-			retrieved, err := os.ReadFile(file)
+		t.Run("DID NOT LOG", func(t *testing.T) {
+			initial := os.Stdout
+			r, w, err := os.Pipe()
 			assert.NilError(t, err)
 
-			assert.Assert(t, len(retrieved) == 0)
-		})
+			os.Stdout = w
 
-		t.Run("ROLLBACK", func(t *testing.T) {
-			os.WriteFile(file, nil, 0600)
+			tx := BeginTx()
+			tx.Append(Stdout().Debug().Msg(l1))
+			tx.Append(Stdout().NoLevel().Msg(l2))
+			tx.Append(Stdout().Warn().Msg(l3))
 
-			toFile := log.File(file)
-			tx := log.BeginTx()
-			tx.Append(toFile.Info().Msg(l1))
-			tx.Append(toFile.Level(level.Custom("MAJOR")).Msg(l2))
-			tx.Append(log.Stdout().Warn().Msg(l3))
-
-			retrieved, err := os.ReadFile(file)
+			err = w.Close()
 			assert.NilError(t, err)
 
-			assert.Assert(t, len(retrieved) == 0)
-		})
+			os.Stdout = initial
 
-		t.Run("ALREADY COMMITED", func(t *testing.T) {
-			os.WriteFile(file, nil, 0600)
+			var read bytes.Buffer
+			_, err = io.Copy(&read, r)
+			assert.NilError(t, err)
 
-			toFile := log.File(file)
-			tx := log.BeginTx()
-			tx.Append(toFile.Info().Msg(l1))
-			tx.Append(toFile.Level(level.Custom("MAJOR")).Msg(l2))
-			tx.Append(toFile.Warn().Msg(l3))
-			tx.Commit()
-			err := tx.Commit()
-
-			assert.Error(t, err, "transaction already committed or rolled back")
-		})
-
-		t.Run("ALREADY ROLLED BACK", func(t *testing.T) {
-			os.WriteFile(file, nil, 0600)
-
-			toFile := log.File(file)
-			tx := log.BeginTx()
-			tx.Append(toFile.Info().Msg(l1))
-			tx.Append(toFile.Level(level.Custom("MAJOR")).Msg(l2))
-			tx.Append(toFile.Warn().Msg(l3))
-			tx.Rollback()
-			err := tx.Rollback()
-
-			assert.Error(t, err, "transaction already committed or rolled back")
+			assert.Assert(t, len(read.Bytes()) == 0)
 		})
 	})
 
-	t.Run("CONFIG FILE", func(t *testing.T) {
-
+	t.Run("CONFIG", func(t *testing.T) {
+		t.SkipNow()
 	})
 
 	t.Run("CONCURRENT WRITING TO STDOUT", func(t *testing.T) {
@@ -816,7 +783,7 @@ func TestOutputToStdout(t *testing.T) {
 			content := []byte("some content " + strconv.Itoa(i))
 			go func() {
 				defer wg.Done()
-				toStdout := log.Stdout()
+				toStdout := Stdout()
 				toStdout.Info().Log(content)
 			}()
 		}
@@ -831,7 +798,7 @@ func TestOutputToStdout(t *testing.T) {
 
 		os.Stdout = w
 
-		log.Stdout().Info().Log(nil)
+		Stdout().Info().Log(nil)
 
 		err = w.Close()
 		assert.NilError(t, err)
@@ -849,17 +816,25 @@ func TestOutputToStdout(t *testing.T) {
 
 func TestOutputToCustom(t *testing.T) {
 	t.Run("FAILED TO WRITE LOG", func(t *testing.T) {
-		t.SkipNow()
+		initial := os.Stderr
+		r, w, err := os.Pipe()
+		assert.NilError(t, err)
+
+		os.Stderr = w
+
 		ed := &errorDriver{}
-		log.OutputDriver(ed).Info().Log([]byte("schmeckermeister"))
+		OutputDriver(ed).Info().Log([]byte("schmeckermeister"))
 
-		//f, err := os.OpenFile(os.Stderr.Name(), os.O_RDONLY, 0777)
-		//assert.NilError(t, err)
-
-		read, err := os.ReadFile(os.Stderr.Name())
+		err = w.Close()
 		assert.NilError(t, err)
 
+		os.Stderr = initial
+
+		var read bytes.Buffer
+		_, err = io.Copy(&read, r)
 		assert.NilError(t, err)
-		assert.Assert(t, bytes.Equal(read, []byte("failed to write log: intentional write error\n")))
+
+		expected := []byte("failed to write log  " + level.Info().Type() + " schmeckermeister: intentional write error\n")
+		assert.Assert(t, bytes.Contains(read.Bytes(), expected))
 	})
 }

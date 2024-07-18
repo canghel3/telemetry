@@ -10,15 +10,15 @@ type FormattingConfig struct {
 }
 
 type LogConfig struct {
-	FormattingEnabled bool           `mapstructure:"enabled"`
-	Timestamp         string         `mapstructure:"timestamp"`
-	FieldOrder        map[string]int `mapstructure:"field_order"`
+	FormattingDisabled bool           `mapstructure:"disabled"`
+	Timestamp          string         `mapstructure:"timestamp"`
+	FieldOrder         map[string]int `mapstructure:"field_order"`
 }
 
 type TxConfig struct {
-	Enabled    bool           `mapstructure:"enabled"`
-	Timestamp  string         `mapstructure:"timestamp"`
-	FieldOrder map[string]int `mapstructure:"field_order"`
+	FormattingDisabled bool           `mapstructure:"disabled"`
+	Timestamp          string         `mapstructure:"timestamp"`
+	FieldOrder         map[string]int `mapstructure:"field_order"`
 }
 
 var PkgConfiguration PkgConfig

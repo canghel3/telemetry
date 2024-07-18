@@ -1,7 +1,7 @@
 {
   "formatting": {
     "log" : {
-      "enabled": false,
+      "disabled": false,
       "field_order":  {
         "timestamp": 1,
         "level": 2,
@@ -11,7 +11,7 @@
       "timestamp": "2024-03-02"
     },
     "transaction" : {
-      "enabled": true,
+      "disabled": false,
       "field_order":  {
         "timestamp": 1,
         "level": 2,

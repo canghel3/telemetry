@@ -92,8 +92,6 @@ func (l *Logger) Metadata(data map[any]any) *Logger {
 // File initiates a Logger instance for logging to the specified file.
 func File(name string) *Logger {
 	l := Default()
-	var cpy = config.PkgConfiguration
-	l.config = cpy
 	l.outputDriver = drivers.ToFileWithName(name)
 	return l
 }
@@ -101,17 +99,13 @@ func File(name string) *Logger {
 // Stdout initiates a Logger instance for logging to stdout.
 func Stdout() *Logger {
 	l := Default()
-	var cpy = config.PkgConfiguration
-	l.config = cpy
 	l.outputDriver = drivers.ToStdout()
 	return l
 }
 
-// OutputDriver initiates a Logger instance for logging to a custom instance.
+// OutputDriver initiates a Logger instance for logging to a custom output driver.
 func OutputDriver(driver drivers.OutputDriver) *Logger {
 	l := Default()
-	var cpy = config.PkgConfiguration
-	l.config = cpy
 	l.outputDriver = driver
 	return l
 }
@@ -136,7 +130,7 @@ func (l *Logger) Msg(b []byte) *Logger {
 func (l *Logger) Log(b []byte) {
 	l.buf = append(l.buf, b...)
 	var output = b
-	if l.config.Formatting.LogConfig.FormattingEnabled {
+	if !l.config.Formatting.LogConfig.FormattingDisabled {
 		output = formatLogOutput(*l)
 	}
 
@@ -152,13 +146,13 @@ func (l *Logger) Log(b []byte) {
 	l.buf = []byte{}
 }
 
-// TODO: enable config formatting
+// TODO: eventually implement field ordering from config
 func formatLogOutput(l Logger) []byte {
 	//TIMESTAMP LEVEL METADATA BUFFER
-	timestamp := time.Now()
+	timestamp := time.Now().Format(l.config.Formatting.LogConfig.Timestamp)
 
 	var out = make([]byte, 0)
-	out = append(out, []byte(timestamp.String())...)
+	out = append(out, []byte(timestamp)...)
 	out = append(out, byte(' '))
 	out = append(out, []byte(l.level.Type())...)
 	out = append(out, byte(' '))
