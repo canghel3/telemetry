@@ -21,13 +21,13 @@ toFile.Error().Log([]byte("encountered error"))
 
 ```go
 //Logging in-line
-log.File(filename).Info().Log([]byte("hello, world!"))
+log.Stdout(filename).Info().Log([]byte("hello, world!"))
 
 //Reusing the same logger
-toFile := log.File(filename)
+stdout := log.Stdout(filename)
 
-toFile.Info().Log([]byte("foo"))
-toFile.Error().Log([]byte("encountered error"))
+stdout.Info().Log([]byte("foo"))
+stdout.Error().Log([]byte("encountered error"))
 ```
 
 <b>Extendable</b> <br>
