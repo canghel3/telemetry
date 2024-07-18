@@ -30,6 +30,12 @@ stdout.Info().Log([]byte("foo"))
 stdout.Error().Log([]byte("encountered error"))
 ```
 
+Logging instances allows setting own metadata.
+
+```go
+log.Stdout().Metadata(map[any]any{"something":"clean"})
+```
+
 <b>Extendable</b> <br>
 Supports addition of custom output drivers for logging to any custom implementation.
 ```go
@@ -54,6 +60,10 @@ log.OutputDriver(ex).Warn().Log([]byte("warning"))
 3. Warn
 4. Info
 5. Debug
+
+```go
+log.Stdout().Info().Log([]byte("hello world"))
+```
 
 <b>Extendable</b><br>
 Supports addition of self defined levels.
@@ -104,4 +114,28 @@ Each logger instance can be modified using a different configuration file.
 ```go
 log.Stdout().Settings(filename).Info().Log([]byte("with settings overwritten"))
 ```
+
+### Transactions
+
+A transaction can be used to group related logs together.
+
+```go
+logTx := log.BeginTx()
+
+logTx.Append(log.Stdout().Info().Msg([]byte("first transaction entry")))
+logTx.Append(log.File(filename).Error().Msg([]byte("second line is an error")))
+logTx.Log()
+```
+
+Transactions also support metadata.
+
+```go
+logTx := log.BeginTxWithMetadata(map[any]any{"something":"clean"})
+
+logTx.Append(log.Stdout().Info().Msg([]byte("first transaction entry")))
+logTx.Append(log.File(filename).Error().Msg([]byte("second line is an error")))
+logTx.Log()
+```
+
+
 
