@@ -24,7 +24,7 @@ toFile.Error().Log([]byte("encountered error"))
 log.Stdout().Info().Log([]byte("hello, world!"))
 
 //Reusing the same logger
-stdout := log.Stdout(filename)
+stdout := log.Stdout()
 
 stdout.Info().Log([]byte("foo"))
 stdout.Error().Log([]byte("encountered error"))
