@@ -39,11 +39,11 @@ func (tx *Tx) Append(log *Logger) {
 
 // Log send the existing log entries to their respective output driver.
 // Any error is written to os.Stderr
-// TODO: add configurable output and error destination;
 func (tx *Tx) Log() {
 	if !tx.commited {
 		tx.commited = true
 		for _, log := range tx.logs {
+			//TODO: disable formatting by config file
 			formattedOutput := formatTransactionOutput(*tx, log)
 			_, err := log.outputDriver.Write(append(formattedOutput, '\n'))
 			if err != nil {

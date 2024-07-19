@@ -149,7 +149,12 @@ func (l *Logger) Log(b []byte) {
 // TODO: eventually implement field ordering from config
 func formatLogOutput(l Logger) []byte {
 	//TIMESTAMP LEVEL METADATA BUFFER
-	timestamp := time.Now().Format(l.config.Formatting.LogConfig.Timestamp)
+	var timestamp string
+	if len(l.config.Formatting.LogConfig.Timestamp) > 0 {
+		timestamp = time.Now().Format(l.config.Formatting.LogConfig.Timestamp)
+	} else {
+		timestamp = time.Now().Format("2006-01-02 15:04:05")
+	}
 
 	var out = make([]byte, 0)
 	out = append(out, []byte(timestamp)...)
