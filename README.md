@@ -2,6 +2,10 @@
 
 A simple and intuitive logging package designed for ease of use.
 
+```bash
+go get -u github.com/Ginger955/telemetry
+```
+
 ### Output
 <b>Built-in outputs:</b><br>
 1. File logging
