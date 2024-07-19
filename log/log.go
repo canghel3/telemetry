@@ -2,7 +2,9 @@ package log
 
 import (
 	"fmt"
+	"github.com/spf13/viper"
 	"os"
+	"telemetry/config"
 	"telemetry/drivers"
 	"telemetry/level"
 	"time"
@@ -13,15 +15,35 @@ type Logger struct {
 	level        level.Level
 	outputDriver drivers.OutputDriver
 	metadata     map[any]any
+	config       config.PkgConfig
+}
+
+// Settings enables overwriting the logger instance configuration.
+func (l *Logger) Settings(file string) *Logger {
+	v := viper.New()
+	v.SetConfigFile(file)
+	err := v.ReadInConfig()
+	if err != nil {
+		Stdout().Error().Log([]byte(fmt.Sprintf("failed to read config: %s", err.Error())))
+	}
+
+	err = v.Unmarshal(&l.config)
+	if err != nil {
+		Stdout().Error().Log([]byte(fmt.Sprintf("failed to unmarshal config: %s", err.Error())))
+	}
+
+	return l
 }
 
 // Default initiates a Logger instance with a stdout driver and no log level.
 func Default() *Logger {
+	var cpy = config.PkgConfiguration
 	return &Logger{
 		outputDriver: drivers.ToStdout(),
 		metadata:     nil,
 		buf:          nil,
 		level:        level.None(),
+		config:       cpy,
 	}
 }
 
@@ -81,7 +103,7 @@ func Stdout() *Logger {
 	return l
 }
 
-// OutputDriver initiates a Logger instance for logging to a custom instance.
+// OutputDriver initiates a Logger instance for logging to a custom output driver.
 func OutputDriver(driver drivers.OutputDriver) *Logger {
 	l := Default()
 	l.outputDriver = driver
@@ -102,31 +124,35 @@ func (l *Logger) Msg(b []byte) *Logger {
 	return cpy
 }
 
-// Log sends the (current log buffer + received "b") to the output driver for further handling (logging).
+// Log sends the current log buffer and the received "b" to the output driver for further handling.
 // The buffer is emptied and can be reused.
 // If an error occurs during writing, it is logged to os.Stderr.
 func (l *Logger) Log(b []byte) {
 	l.buf = append(l.buf, b...)
-	formattedOutput := formatLogOutput(*l)
-	_, err := l.outputDriver.Write(append(formattedOutput, '\n'))
+	var output = b
+	if !l.config.Formatting.LogConfig.FormattingDisabled {
+		output = formatLogOutput(*l)
+	}
+
+	_, err := l.outputDriver.Write(append(output, '\n'))
 	if err != nil {
 		//write the error encountered during writing to os.Stderr
 		//we could write to the log output driver because it implements the io.Writer,
 		//but if the output driver is fatally broken, the writing failure will be lost as well
 		//and debugging becomes more difficult.
-		fmt.Fprintf(os.Stderr, "failed to write log %s: %s\n", formattedOutput, err.Error())
+		fmt.Fprintf(os.Stderr, "failed to write log %s: %s\n", output, err.Error())
 	}
 
 	l.buf = []byte{}
 }
 
-// TODO: enable config formatting
+// TODO: eventually implement field ordering from config
 func formatLogOutput(l Logger) []byte {
 	//TIMESTAMP LEVEL METADATA BUFFER
-	timestamp := time.Now()
+	timestamp := time.Now().Format(l.config.Formatting.LogConfig.Timestamp)
 
 	var out = make([]byte, 0)
-	out = append(out, []byte(timestamp.String())...)
+	out = append(out, []byte(timestamp)...)
 	out = append(out, byte(' '))
 	out = append(out, []byte(l.level.Type())...)
 	out = append(out, byte(' '))

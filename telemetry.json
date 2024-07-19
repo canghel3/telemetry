@@ -1,0 +1,24 @@
+{
+  "formatting": {
+    "log" : {
+      "disabled": false,
+      "field_order":  {
+        "timestamp": 1,
+        "level": 2,
+        "metadata": 3,
+        "buffer": 4
+      },
+      "timestamp": "2006-01-02 15:04:05"
+    },
+    "transaction" : {
+      "disabled": false,
+      "field_order":  {
+        "timestamp": 1,
+        "level": 2,
+        "metadata": 3,
+        "buffer": 4
+      },
+      "timestamp": "2006-01-02 15:04:05"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "formatting": {
+    "log" : {
+      "enabled": true,
+      "field_order":  {
+        "timestamp": 1,
+        "level": 2,
+        "metadata": 3,
+        "buffer": 4
+      },
+      "timestamp": "2024-03-02"
+    },
+    "transaction" : {
+      "enabled": true,
+      "field_order":  {
+        "timestamp": 1,
+        "level": 2,
+        "metadata": 3,
+        "buffer": 4
+      },
+      "timestamp": "2024-03-02"
+    }
+  }
+}
