@@ -1,8 +1,8 @@
 package main
 
 import (
+	"github.com/Ginger955/telemetry/log"
 	"os"
-	"telemetry/log"
 )
 
 type CustomDriver struct {
