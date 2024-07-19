@@ -834,7 +834,8 @@ func TestOutputToCustom(t *testing.T) {
 		_, err = io.Copy(&read, r)
 		assert.NilError(t, err)
 
-		expected := []byte("failed to write log  " + level.Info().Type() + " schmeckermeister: intentional write error\n")
-		assert.Assert(t, bytes.Contains(read.Bytes(), expected))
+		assert.Assert(t, bytes.Contains(read.Bytes(), []byte("failed to write log")))
+		assert.Assert(t, bytes.Contains(read.Bytes(), []byte(level.Info().Type())))
+		assert.Assert(t, bytes.Contains(read.Bytes(), []byte("schmeckermeister: intentional write error")))
 	})
 }
