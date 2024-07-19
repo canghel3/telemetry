@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/Ginger955/telemetry/config"
+	"github.com/Ginger955/telemetry/log"
 	"github.com/spf13/viper"
 	"os"
-	"telemetry/config"
-	"telemetry/log"
 )
 
 type CustomDriver struct {

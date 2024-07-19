@@ -2,11 +2,11 @@ package log
 
 import (
 	"fmt"
+	"github.com/Ginger955/telemetry/config"
+	"github.com/Ginger955/telemetry/drivers"
+	"github.com/Ginger955/telemetry/level"
 	"github.com/spf13/viper"
 	"os"
-	"telemetry/config"
-	"telemetry/drivers"
-	"telemetry/level"
 	"time"
 )
 
