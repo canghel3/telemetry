@@ -10,13 +10,13 @@ type Tx struct {
 	id         string
 	commited   bool
 	attributes map[any]any
-	logs       []Logger
+	logs       []*Logger
 }
 
 func BeginTx() *Tx {
 	return &Tx{
 		id:         uuid.New().String(),
-		logs:       []Logger{},
+		logs:       []*Logger{},
 		attributes: nil,
 		commited:   false,
 	}
@@ -24,7 +24,7 @@ func BeginTx() *Tx {
 
 func BeginTxWithMetadata(metadata map[any]any) *Tx {
 	return &Tx{
-		logs:       []Logger{},
+		logs:       []*Logger{},
 		id:         uuid.New().String(),
 		attributes: metadata,
 		commited:   false,
@@ -33,7 +33,7 @@ func BeginTxWithMetadata(metadata map[any]any) *Tx {
 
 func (tx *Tx) Append(log *Logger) {
 	if !tx.commited {
-		tx.logs = append(tx.logs, *log)
+		tx.logs = append(tx.logs, log)
 	}
 }
 
@@ -56,7 +56,7 @@ func (tx *Tx) Log() {
 	}
 }
 
-func formatTransactionOutput(tx Tx, log Logger) []byte {
+func formatTransactionOutput(tx Tx, log *Logger) []byte {
 	output := make([]byte, 0)
 
 	t := "| TRANSACTION - " + tx.id + " |"

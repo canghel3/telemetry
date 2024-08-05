@@ -7,11 +7,13 @@ import (
 	"github.com/Ginger955/telemetry/level"
 	"github.com/spf13/viper"
 	"os"
+	"sync"
 	"time"
 )
 
 type Logger struct {
 	buf          []byte
+	lock         sync.Mutex
 	level        level.Level
 	outputDriver drivers.OutputDriver
 	metadata     map[any]any
@@ -23,6 +25,7 @@ func (l *Logger) Settings(file string) *Logger {
 	v := viper.New()
 	v.SetConfigFile(file)
 	err := v.ReadInConfig()
+
 	if err != nil {
 		Stdout().Error().Log([]byte(fmt.Sprintf("failed to read config: %s", err.Error())))
 	}
@@ -40,6 +43,7 @@ func Default() *Logger {
 	var cpy = config.PkgConfiguration
 	return &Logger{
 		outputDriver: drivers.ToStdout(),
+		lock:         sync.Mutex{},
 		metadata:     nil,
 		buf:          nil,
 		level:        level.None(),
@@ -120,7 +124,7 @@ func (l *Logger) Msg(b []byte) *Logger {
 		metadata:     l.metadata,
 	}
 
-	cpy.buf = formatLogOutput(*cpy)
+	cpy.buf = formatLogOutput(cpy)
 	return cpy
 }
 
@@ -128,10 +132,12 @@ func (l *Logger) Msg(b []byte) *Logger {
 // The buffer is emptied and can be reused.
 // If an error occurs during writing, it is logged to os.Stderr.
 func (l *Logger) Log(b []byte) {
+	l.lock.Lock()
+	defer l.lock.Unlock()
 	l.buf = append(l.buf, b...)
 	var output = b
 	if !l.config.Formatting.LogConfig.FormattingDisabled {
-		output = formatLogOutput(*l)
+		output = formatLogOutput(l)
 	}
 
 	_, err := l.outputDriver.Write(append(output, '\n'))
@@ -147,7 +153,7 @@ func (l *Logger) Log(b []byte) {
 }
 
 // TODO: eventually implement field ordering from config
-func formatLogOutput(l Logger) []byte {
+func formatLogOutput(l *Logger) []byte {
 	//TIMESTAMP LEVEL METADATA BUFFER
 	var timestamp string
 	if len(l.config.Formatting.LogConfig.Timestamp) > 0 {
