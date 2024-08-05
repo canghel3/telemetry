@@ -3,7 +3,7 @@
 A simple and intuitive logging package designed for ease of use.
 
 ```bash
-go get -u github.com/Ginger955/telemetry@v1.0.0
+go get -u github.com/Ginger955/telemetry@v1.0.1
 ```
 
 ### Output
