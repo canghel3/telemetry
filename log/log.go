@@ -124,7 +124,7 @@ func (l *Logger) Msg(b []byte) *Logger {
 		metadata:     l.metadata,
 	}
 
-	cpy.buf = formatLogOutput(cpy)
+	cpy.buf = cpy.formatLogOutput()
 	return cpy
 }
 
@@ -137,7 +137,7 @@ func (l *Logger) Log(b []byte) {
 	l.buf = append(l.buf, b...)
 	var output = b
 	if !l.config.Formatting.LogConfig.FormattingDisabled {
-		output = formatLogOutput(l)
+		output = l.formatLogOutput()
 	}
 
 	_, err := l.outputDriver.Write(append(output, '\n'))
@@ -154,6 +154,32 @@ func (l *Logger) Log(b []byte) {
 
 // TODO: eventually implement field ordering from config
 func formatLogOutput(l *Logger) []byte {
+	//TIMESTAMP LEVEL METADATA BUFFER
+	var timestamp string
+	if len(l.config.Formatting.LogConfig.Timestamp) > 0 {
+		timestamp = time.Now().Format(l.config.Formatting.LogConfig.Timestamp)
+	} else {
+		timestamp = time.Now().Format("2006-01-02 15:04:05")
+	}
+
+	var out = make([]byte, 0)
+	out = append(out, []byte(timestamp)...)
+	out = append(out, byte(' '))
+	out = append(out, []byte(l.level.Type())...)
+	out = append(out, byte(' '))
+
+	var meta2bytes = make([]byte, 0)
+	for k, v := range l.metadata {
+		meta2bytes = append(meta2bytes, []byte(fmt.Sprintf("%v:%v ", k, v))...) //careful
+	}
+	//very careful (whitespace)
+	out = append(out, meta2bytes...)
+	out = append(out, l.buf...)
+
+	return out
+}
+
+func (l *Logger) formatLogOutput() []byte {
 	//TIMESTAMP LEVEL METADATA BUFFER
 	var timestamp string
 	if len(l.config.Formatting.LogConfig.Timestamp) > 0 {
