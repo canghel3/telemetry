@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/Ginger955/telemetry/config"
 	"github.com/Ginger955/telemetry/log"
 	"github.com/spf13/viper"
@@ -26,12 +25,12 @@ func init() {
 	v.SetConfigType("json")
 	err := v.ReadInConfig()
 	if err != nil {
-		log.Stdout().Error().Log([]byte(fmt.Sprintf("failed to read config: %s", err.Error())))
+		log.Stdout().Error().Logf("failed to read config: %s", err.Error())
 	}
 
 	err = v.Unmarshal(&config.PkgConfiguration)
 	if err != nil {
-		log.Stdout().Error().Log([]byte(fmt.Sprintf("failed to unmarshal config: %s", err.Error())))
+		log.Stdout().Error().Logf("failed to unmarshal config: %s", err.Error())
 	}
 }
 
@@ -40,26 +39,26 @@ func init() {
 func main() {
 	const logfile = "./telemetry.log"
 	const configFile = "./config.json"
-	log.Stdout().Error().Log([]byte("HELLO"))
+	log.Stdout().Error().Log("HELLO")
 
 	stdout := log.Stdout()
 
-	stdout.Metadata(map[any]any{"something": "clean"})
-	stdout.Info().Log(nil)
+	stdout.Info().Logf("a formatted log %s", "OI BILLY")
+	stdout.Info().Metadata(map[any]any{"something": "clean"}).Log("salutare")
 
-	stdout.Error().Log([]byte("HELLO"))
-	stdout.Info().Log([]byte("WORLD"))
+	stdout.Error().Log("HELLO")
+	stdout.Info().Log("WORLD")
 
-	toFile := log.File(logfile)
-	tx := log.BeginTx()
-	tx.Append(toFile.Error().Msg([]byte("something is going on")))
-	tx.Append(toFile.Info().Msg([]byte("marcele, la covrigarie!")))
-	tx.Append(log.Stdout().Msg([]byte("TO STDOUT!")))
-	tx.Log()
-
-	stdoutWithSettings := log.Stdout()
-	stdoutWithSettings.Settings("./overwriter.json")
-	stdoutWithSettings.Log([]byte("inghetata de fistic"))
+	//toFile := log.File(logfile)
+	//tx := log.BeginTx()
+	//tx.Append(toFile.Error().Msg([]byte("something is going on")))
+	//tx.Append(toFile.Info().Msg([]byte("marcele, la covrigarie!")))
+	//tx.Append(log.Stdout().Msg([]byte("TO STDOUT!")))
+	//tx.Log()
+	//
+	//stdoutWithSettings := log.Stdout()
+	//stdoutWithSettings.Settings("./overwriter.json")
+	//stdoutWithSettings.Log([]byte("inghetata de fistic"))
 
 	os.WriteFile(logfile, nil, 0644)
 }

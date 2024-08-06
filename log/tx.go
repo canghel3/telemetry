@@ -7,56 +7,57 @@ import (
 )
 
 type Tx struct {
-	id         string
-	commited   bool
-	attributes map[any]any
-	logs       []*Logger
+	messages []*Message
+	id       string
+	commited bool
+	metadata map[any]any
 }
 
 func BeginTx() *Tx {
 	return &Tx{
-		id:         uuid.New().String(),
-		logs:       []*Logger{},
-		attributes: nil,
-		commited:   false,
+		id:       uuid.New().String(),
+		messages: []*Message{},
+		metadata: nil,
+		commited: false,
 	}
 }
 
 func BeginTxWithMetadata(metadata map[any]any) *Tx {
 	return &Tx{
-		logs:       []*Logger{},
-		id:         uuid.New().String(),
-		attributes: metadata,
-		commited:   false,
+		messages: []*Message{},
+		id:       uuid.New().String(),
+		metadata: metadata,
+		commited: false,
 	}
 }
 
-func (tx *Tx) Append(log *Logger) {
+func (tx *Tx) Append(message *Message) {
 	if !tx.commited {
-		tx.logs = append(tx.logs, log)
+		tx.messages = append(tx.messages, message)
 	}
 }
 
-// Log send the existing log entries to their respective output driver.
+// Log send the existing message entries to their respective output driver.
 // Any error is written to os.Stderr
 func (tx *Tx) Log() {
 	if !tx.commited {
 		tx.commited = true
-		for _, log := range tx.logs {
-			//TODO: disable formatting by config file
-			formattedOutput := formatTransactionOutput(*tx, log)
-			_, err := log.outputDriver.Write(append(formattedOutput, '\n'))
+		for _, msg := range tx.messages {
+			//TODO: enable/disable formatting based on config
+			formattedOutput := tx.formatTransactionOutput(msg)
+			_, err := msg.output.driver.Write(formattedOutput)
 			if err != nil {
 				//write the error encountered during logging to os.Stderr. wip: any configured file
 				//we could write to the log output driver because it implements the required w io.Writer,
-				//but if the output driver is fatally broken, we also lose the error logs.
+				//but if the output driver is fatally broken, we also lose the error messages.
 				fmt.Fprintf(os.Stderr, "failed to write log %s: %s\n", formattedOutput, err.Error())
 			}
 		}
 	}
 }
 
-func formatTransactionOutput(tx Tx, log *Logger) []byte {
+// TODO: complete formatter
+func (tx *Tx) formatTransactionOutput(msg *Message) []byte {
 	output := make([]byte, 0)
 
 	t := "| TRANSACTION - " + tx.id + " |"
@@ -65,13 +66,14 @@ func formatTransactionOutput(tx Tx, log *Logger) []byte {
 	output = append(output, ' ')
 
 	var meta2bytes = make([]byte, 0)
-	//meta2bytes = append(meta2bytes, "METADATA: "...)
-	for k, v := range tx.attributes {
+	for k, v := range tx.metadata {
 		meta2bytes = append(meta2bytes, []byte(fmt.Sprintf("%v:%v ", k, v))...)
 	}
 
 	output = append(output, meta2bytes...)
 	output = append(output, ' ')
-	output = append(output, log.buf...)
+	output = append(output, msg.content...)
+	output = append(output, '\n')
+
 	return output
 }

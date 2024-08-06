@@ -1,7 +1,6 @@
 ### Telemetry package
 
-A simple logging package.
-THIS PACKAGE IS NOT CONCURRENCY SAFE.
+A simple logging package. A major refactoring (v1.1.0) is underway. Version 1.0.1 is usable, but is not concurrency safe.
 
 ```bash
 go get -u github.com/Ginger955/telemetry@v1.0.1
