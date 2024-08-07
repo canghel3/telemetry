@@ -1,6 +1,7 @@
 package log
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/Ginger955/telemetry/level"
 	"os"
@@ -14,6 +15,7 @@ type Message struct {
 	output   *Output
 }
 
+// TODO: implement common metadata for multiple messages provided by the Output
 func newMessage(output *Output, level level.Level) *Message {
 	return &Message{
 		content:  nil,
@@ -40,24 +42,15 @@ func (m *Message) Msgf(msg string, format ...any) *Message {
 
 func (m *Message) Log(msg string) {
 	m.content = []byte(msg)
-
-	var output = m.content
-	if !m.output.config.Formatting.LogConfig.FormattingDisabled {
-		output = m.formatLogOutput()
-	}
-
-	_, err := m.output.driver.Write(output)
-	if err != nil {
-		//write the error encountered during writing to os.Stderr
-		//we could write to the log output driver because it implements the io.Writer,
-		//but if the output driver is fatally broken, the writing failure will be lost as well
-		//and debugging becomes more difficult.
-		fmt.Fprintf(os.Stderr, "failed to write log %s: %s\n", msg, err.Error())
-	}
+	m.log()
 }
 
 func (m *Message) Logf(msg string, format ...any) {
 	m.content = []byte(fmt.Sprintf(msg, format...))
+	m.log()
+}
+
+func (m *Message) log() {
 	var output = m.content
 	if !m.output.config.Formatting.LogConfig.FormattingDisabled {
 		output = m.formatLogOutput()
@@ -69,33 +62,35 @@ func (m *Message) Logf(msg string, format ...any) {
 		//we could write to the log output driver because it implements the io.Writer,
 		//but if the output driver is fatally broken, the writing failure will be lost as well
 		//and debugging becomes more difficult.
-		fmt.Fprintf(os.Stderr, "failed to write log %s: %s\n", msg, err.Error())
+		fmt.Fprintf(os.Stderr, "failed to write log %s: %s\n", m.content, err.Error())
 	}
 }
 
 func (m *Message) formatLogOutput() []byte {
 	//default order: TIMESTAMP LEVEL METADATA BUFFER
-	var timestamp string
+	var buffer bytes.Buffer
+
+	// Format timestamp
+	timestampFormat := "2006-01-02 15:04:05"
 	if len(m.output.config.Formatting.LogConfig.Timestamp) > 0 {
-		timestamp = time.Now().Format(m.output.config.Formatting.LogConfig.Timestamp)
-	} else {
-		timestamp = time.Now().Format("2006-01-02 15:04:05")
+		timestampFormat = m.output.config.Formatting.LogConfig.Timestamp
 	}
 
-	var out = make([]byte, 0)
-	out = append(out, []byte(timestamp)...)
-	out = append(out, byte(' '))
-	out = append(out, []byte(m.level.Type())...)
-	out = append(out, byte(' '))
+	buffer.WriteString(time.Now().Format(timestampFormat))
+	buffer.WriteByte(' ')
 
-	var meta2bytes = make([]byte, 0)
+	// format level
+	buffer.WriteString(m.level.Type())
+	buffer.WriteByte(' ')
+
+	// format metadata
 	for k, v := range m.metadata {
-		meta2bytes = append(meta2bytes, []byte(fmt.Sprintf("%v:%v ", k, v))...) //careful
+		fmt.Fprintf(&buffer, "%v:%v ", k, v)
 	}
-	//very careful (whitespace)
-	out = append(out, meta2bytes...)
-	out = append(out, m.content...)
-	out = append(out, '\n')
 
-	return out
+	// add content
+	buffer.Write(m.content)
+	buffer.WriteByte('\n')
+
+	return buffer.Bytes()
 }

@@ -14,27 +14,27 @@ go get -u github.com/Ginger955/telemetry@v1.0.1
 //Logging in-line
 log.File(filename).Info().Log([]byte("hello, world!"))
 
-//Reusing the same logger
+//Reusing the same output destination
 toFile := log.File(filename)
 
-toFile.Info().Log([]byte("foo"))
-toFile.Error().Log([]byte("encountered error"))
+toFile.Info().Log("foo")
+toFile.Error().Logf("encountered error: %s", "sample error")
 ```
 
 2. Stdout logging
 
 ```go
 //Logging in-line
-log.Stdout().Info().Log([]byte("hello, world!"))
+log.Stdout().Info().Log("hello, world!")
 
-//Reusing the same logger
+//Reusing the same output destination
 stdout := log.Stdout()
 
-stdout.Info().Log([]byte("foo"))
-stdout.Error().Log([]byte("encountered error"))
+stdout.Info().Log("foo")
+stdout.Error().Logf("encountered error: %s", "sample error")
 ```
 
-Logging instances allows setting own metadata.
+A log can also contain metadata.
 
 ```go
 log.Stdout().Metadata(map[any]any{"something":"clean"})

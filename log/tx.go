@@ -72,6 +72,8 @@ func (tx *Tx) formatTransactionOutput(msg *Message) []byte {
 
 	output = append(output, meta2bytes...)
 	output = append(output, ' ')
+	output = append(output, msg.level.Type()...)
+	output = append(output, ' ')
 	output = append(output, msg.content...)
 	output = append(output, '\n')
 
