@@ -271,6 +271,10 @@ func TestOutputToFile(t *testing.T) {
 				assert.Assert(t, bytes.Contains(retrieved, expected) == true)
 			})
 		})
+
+		t.Run("WITH METADATA", func(t *testing.T) {
+			t.Fail()
+		})
 	})
 
 	t.Run("TRANSACTIONS", func(t *testing.T) {
@@ -342,8 +346,8 @@ func TestOutputToFile(t *testing.T) {
 			})
 
 			t.Run("WITH METADATA", func(t *testing.T) {
-				//TODO: check for metadata in the resulting logs
 				t.Fail()
+				//TODO: expected log needs to be formatted based on the order of elements in the metadata map
 				os.WriteFile(file, nil, 0600)
 
 				meta := map[any]any{
@@ -362,9 +366,9 @@ func TestOutputToFile(t *testing.T) {
 				retrieved, err := os.ReadFile(file)
 				assert.NilError(t, err)
 
-				expected1 := []byte(level.Info().Type() + " " + l1 + "\n")
-				expected2 := []byte(level.Custom("MAJOR").Type() + " " + l2 + "\n")
-				expected3 := []byte(level.Warn().Type() + " " + l3 + "\n")
+				expected1 := []byte(level.Info().Type() + " 1:2 97:true 3.14159:1 " + l1 + "\n")
+				expected2 := []byte(level.Custom("MAJOR").Type() + " 1:2 97:true 3.14159:1 " + l2 + "\n")
+				expected3 := []byte(level.Warn().Type() + " 1:2 97:true 3.14159:1 " + l3 + "\n")
 				assert.Assert(t, bytes.Contains(retrieved, expected1) == true)
 				assert.Assert(t, bytes.Contains(retrieved, expected2) == true)
 				assert.Assert(t, bytes.Contains(retrieved, expected3) == false)
@@ -387,7 +391,7 @@ func TestOutputToFile(t *testing.T) {
 		})
 
 		t.Run("MSGF", func(t *testing.T) {
-
+			t.Fail()
 		})
 	})
 
@@ -687,9 +691,12 @@ func TestOutputToStdout(t *testing.T) {
 		})
 
 		t.Run("LOGF", func(t *testing.T) {
-
+			t.Fail()
 		})
 
+		t.Run("WITH METADATA", func(t *testing.T) {
+			t.Fail()
+		})
 	})
 
 	t.Run("TRANSACTIONS", func(t *testing.T) {
@@ -760,7 +767,7 @@ func TestOutputToStdout(t *testing.T) {
 
 		t.Run("WITH METADATA", func(t *testing.T) {
 			t.Fail()
-			//TODO: check the metadata content
+			//TODO: expected log needs to be formatted based on the order of elements in the metadata map
 			os.WriteFile(file, nil, 0600)
 
 			meta := map[any]any{
@@ -779,9 +786,9 @@ func TestOutputToStdout(t *testing.T) {
 			retrieved, err := os.ReadFile(file)
 			assert.NilError(t, err)
 
-			expected1 := []byte(level.Info().Type() + " " + l1 + "\n")
-			expected2 := []byte(level.Custom("MAJOR").Type() + " " + l2 + "\n")
-			expected3 := []byte(level.Warn().Type() + " " + l3 + "\n")
+			expected1 := []byte(level.Info().Type() + " 1:2 a:true 3.14159:1 " + l1 + "\n")
+			expected2 := []byte(level.Custom("MAJOR").Type() + " 1:2 a:true 3.14159:1 " + l2 + "\n")
+			expected3 := []byte(level.Warn().Type() + " 1:2 a:true 3.14159:1 " + l3 + "\n")
 			assert.Assert(t, bytes.Contains(retrieved, expected1) == true)
 			assert.Assert(t, bytes.Contains(retrieved, expected2) == true)
 			assert.Assert(t, bytes.Contains(retrieved, expected3) == false)

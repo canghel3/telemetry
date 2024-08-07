@@ -9,14 +9,6 @@ import (
 	"sync"
 )
 
-//TODO: refactor package such that it is concurrency safe.
-// potential solution is to restructure code as such:
-// create LogDriver struct that can be created by File, Stdout and/or OutputDriver
-// the level setting (and other) methods have a LogDriver receiver and return a new Message struct
-// the Message struct methods are simply Msg and Log
-// structuring the code in this way allows me (the creator) to impose the precise flow i want for the operations
-// and ensures (hopefully) that the package is concurrency safe
-
 type Output struct {
 	lock   sync.Mutex
 	driver drivers.OutputDriver
@@ -87,11 +79,13 @@ func (o *Output) Settings(file string) *Output {
 
 	if err != nil {
 		Stdout().Error().Log(fmt.Sprintf("failed to read config: %s", err.Error()))
+		return n
 	}
 
 	err = v.Unmarshal(&n.config)
 	if err != nil {
 		Stdout().Error().Log(fmt.Sprintf("failed to unmarshal config: %s", err.Error()))
+		return n
 	}
 
 	return n

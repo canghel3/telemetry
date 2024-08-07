@@ -1,9 +1,11 @@
 package log
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/google/uuid"
 	"os"
+	"time"
 )
 
 type Tx struct {
@@ -58,24 +60,35 @@ func (tx *Tx) Log() {
 
 // TODO: complete formatter
 func (tx *Tx) formatTransactionOutput(msg *Message) []byte {
-	output := make([]byte, 0)
+	var buffer bytes.Buffer
 
-	t := "| TRANSACTION - " + tx.id + " |"
-
-	output = append(output, t...)
-	output = append(output, ' ')
-
-	var meta2bytes = make([]byte, 0)
-	for k, v := range tx.metadata {
-		meta2bytes = append(meta2bytes, []byte(fmt.Sprintf("%v:%v ", k, v))...)
+	// format timestamp
+	timestampFormat := "2006-01-02 15:04:05"
+	if len(msg.output.config.Formatting.LogConfig.Timestamp) > 0 {
+		timestampFormat = msg.output.config.Formatting.LogConfig.Timestamp
 	}
 
-	output = append(output, meta2bytes...)
-	output = append(output, ' ')
-	output = append(output, msg.level.Type()...)
-	output = append(output, ' ')
-	output = append(output, msg.content...)
-	output = append(output, '\n')
+	buffer.WriteString(time.Now().Format(timestampFormat))
+	buffer.WriteByte(' ')
+	buffer.WriteString("| TRANSACTION - " + tx.id + " |")
+	buffer.WriteByte(' ')
 
-	return output
+	// format level
+	buffer.WriteString(msg.level.Type())
+	buffer.WriteByte(' ')
+
+	// format metadata
+	for k, v := range tx.metadata {
+		fmt.Fprintf(&buffer, "%v:%v ", k, v)
+	}
+	//
+	//if len(tx.metadata) > 0 {
+	//	buffer.WriteByte(' ')
+	//}
+
+	// add content
+	buffer.Write(msg.content)
+	buffer.WriteByte('\n')
+
+	return buffer.Bytes()
 }

@@ -70,7 +70,7 @@ func (m *Message) formatLogOutput() []byte {
 	//default order: TIMESTAMP LEVEL METADATA BUFFER
 	var buffer bytes.Buffer
 
-	// Format timestamp
+	// format timestamp
 	timestampFormat := "2006-01-02 15:04:05"
 	if len(m.output.config.Formatting.LogConfig.Timestamp) > 0 {
 		timestampFormat = m.output.config.Formatting.LogConfig.Timestamp
@@ -87,6 +87,10 @@ func (m *Message) formatLogOutput() []byte {
 	for k, v := range m.metadata {
 		fmt.Fprintf(&buffer, "%v:%v ", k, v)
 	}
+
+	//if len(m.metadata) > 0 {
+	//	buffer.WriteByte(' ')
+	//}
 
 	// add content
 	buffer.Write(m.content)
