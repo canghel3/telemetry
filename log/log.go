@@ -6,6 +6,7 @@ import (
 	"github.com/Ginger955/telemetry/drivers"
 	"github.com/Ginger955/telemetry/level"
 	"github.com/spf13/viper"
+	"sync"
 )
 
 //TODO: refactor package such that it is concurrency safe.
@@ -17,6 +18,7 @@ import (
 // and ensures (hopefully) that the package is concurrency safe
 
 type Output struct {
+	lock   sync.Mutex
 	driver drivers.OutputDriver
 	config config.PkgConfig
 }
@@ -70,8 +72,15 @@ func (o *Output) Level(custom level.Level) *Message {
 	return newMessage(o, custom)
 }
 
-// Settings enables overwriting the output instance configuration.
+// Settings overwrites the default output instance configuration.
 func (o *Output) Settings(file string) *Output {
+	var n = new(Output)
+
+	o.lock.Lock()
+	n.driver = o.driver
+	n.config = o.config
+	o.lock.Unlock()
+
 	v := viper.New()
 	v.SetConfigFile(file)
 	err := v.ReadInConfig()
@@ -80,10 +89,10 @@ func (o *Output) Settings(file string) *Output {
 		Stdout().Error().Log(fmt.Sprintf("failed to read config: %s", err.Error()))
 	}
 
-	err = v.Unmarshal(&o.config)
+	err = v.Unmarshal(&n.config)
 	if err != nil {
 		Stdout().Error().Log(fmt.Sprintf("failed to unmarshal config: %s", err.Error()))
 	}
 
-	return o
+	return n
 }
