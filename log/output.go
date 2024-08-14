@@ -10,7 +10,10 @@ import (
 )
 
 type Output struct {
-	lock   sync.Mutex
+	//the lock is used when calling the Settings method
+	// in order to return an exact shallow copy of your Output instance.
+	lock sync.Mutex
+
 	driver drivers.OutputDriver
 	config config.PkgConfig
 }
@@ -64,7 +67,8 @@ func (o *Output) Level(custom level.Level) *Message {
 	return newMessage(o, custom)
 }
 
-// Settings overwrites the default output instance configuration.
+// Settings overwrites your current Output instance configuration.
+// Returns a shallow copy of your Output instance.
 func (o *Output) Settings(file string) *Output {
 	var n = new(Output)
 

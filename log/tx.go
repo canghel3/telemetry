@@ -68,6 +68,7 @@ func (tx *Tx) formatTransactionOutput(msg *Message) []byte {
 		timestampFormat = msg.output.config.Formatting.LogConfig.Timestamp
 	}
 
+	//transaction log prefix
 	buffer.WriteString(time.Now().Format(timestampFormat))
 	buffer.WriteByte(' ')
 	buffer.WriteString("| TRANSACTION - " + tx.id + " |")

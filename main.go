@@ -41,8 +41,7 @@ func main() {
 	const configFile = "./config.json"
 	log.Stdout().Error().Log("HELLO")
 
-	stdout := log.Stdout()
-
+	stdout := log.Stdout().Settings("")
 	stdout.Info().Logf("a formatted log %s", "OI BILLY")
 	stdout.Info().Metadata(map[any]any{"something": "clean"}).Log("salutare")
 
@@ -61,4 +60,5 @@ func main() {
 	//stdoutWithSettings.Log([]byte("inghetata de fistic"))
 
 	os.WriteFile(logfile, nil, 0644)
+
 }
