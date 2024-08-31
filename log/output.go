@@ -16,12 +16,14 @@ type Output struct {
 
 	driver drivers.OutputDriver
 	config config.PkgConfig
+
+	meta map[any]any
 }
 
 // Default initiates an Output instance with a stdout driver.
 func Default() *Output {
 	return &Output{
-		driver: drivers.ToStdout(),
+		driver: drivers.NewStdoutDriver(),
 		config: config.PkgConfiguration,
 	}
 }
@@ -29,14 +31,14 @@ func Default() *Output {
 // File initiates an Output instance for logging to the specified file.
 func File(name string) *Output {
 	l := Default()
-	l.driver = drivers.ToFileWithName(name)
+	l.driver = drivers.NewFileDriver(name)
 	return l
 }
 
 // Stdout initiates an Output instance for logging to stdout.
 func Stdout() *Output {
 	d := Default()
-	d.driver = drivers.ToStdout()
+	d.driver = drivers.NewStdoutDriver()
 	return d
 }
 
@@ -93,4 +95,9 @@ func (o *Output) Settings(file string) *Output {
 	}
 
 	return n
+}
+
+func (o *Output) WithMetadata(meta map[any]any) *Output {
+	o.meta = meta
+	return o
 }

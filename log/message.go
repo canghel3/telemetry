@@ -15,12 +15,11 @@ type Message struct {
 	output   *Output
 }
 
-// TODO: implement common metadata for multiple messages provided by the Output
 func newMessage(output *Output, level level.Level) *Message {
 	return &Message{
 		content:  nil,
 		level:    level,
-		metadata: nil,
+		metadata: output.meta,
 		output:   output,
 	}
 }

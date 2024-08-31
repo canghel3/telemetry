@@ -7,6 +7,8 @@ import (
 	"os"
 )
 
+var Stdout = log.Stdout()
+
 type CustomDriver struct {
 	msg string
 }
@@ -41,24 +43,26 @@ func main() {
 	const configFile = "./config.json"
 	log.Stdout().Error().Log("HELLO")
 
-	stdout := log.Stdout().Settings("")
-	stdout.Info().Logf("a formatted log %s", "OI BILLY")
-	stdout.Info().Metadata(map[any]any{"something": "clean"}).Log("salutare")
+	std := log.Stdout()
 
-	stdout.Error().Log("HELLO")
-	stdout.Info().Log("WORLD")
+	//settings are not persistent unless the output is assigned to a variable
+	std.Settings("some config file")
 
-	//toFile := log.File(logfile)
-	//tx := log.BeginTx()
-	//tx.Append(toFile.Error().Msg([]byte("something is going on")))
-	//tx.Append(toFile.Info().Msg([]byte("marcele, la covrigarie!")))
-	//tx.Append(log.Stdout().Msg([]byte("TO STDOUT!")))
-	//tx.Log()
-	//
-	//stdoutWithSettings := log.Stdout()
-	//stdoutWithSettings.Settings("./overwriter.json")
-	//stdoutWithSettings.Log([]byte("inghetata de fistic"))
+	s := std.Settings("another config file.json")
+	s.Info().Log("persistent custom settings")
+
+	toFile := log.File(logfile)
+	tx := log.BeginTx()
+	tx.Append(toFile.Error().Msg("something is going on"))
+	tx.Append(toFile.Info().Msg("marcele, la covrigarie!"))
+	tx.Append(log.Stdout().Warn().Msg("TO STDOUT!"))
+	tx.Log()
 
 	os.WriteFile(logfile, nil, 0644)
 
+	s = log.Stdout().WithMetadata(map[any]any{"5": 6})
+	s.Info().Metadata(map[any]any{"1": 2}).Log("good mornin'")
+
+	k := log.Stdout().WithMetadata(map[any]any{"2": 3})
+	k.Info().Log("good night")
 }

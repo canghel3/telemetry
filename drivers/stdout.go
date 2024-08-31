@@ -2,13 +2,13 @@ package drivers
 
 import "os"
 
-type Stdout struct {
+type StdoutDriver struct {
 }
 
-func ToStdout() *Stdout {
-	return &Stdout{}
+func NewStdoutDriver() *StdoutDriver {
+	return &StdoutDriver{}
 }
 
-func (s *Stdout) Write(p []byte) (int, error) {
+func (s *StdoutDriver) Write(p []byte) (int, error) {
 	return os.Stdout.Write(p)
 }

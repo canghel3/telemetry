@@ -71,8 +71,7 @@ func (tx *Tx) formatTransactionOutput(msg *Message) []byte {
 	//transaction log prefix
 	buffer.WriteString(time.Now().Format(timestampFormat))
 	buffer.WriteByte(' ')
-	buffer.WriteString("| TRANSACTION - " + tx.id + " |")
-	buffer.WriteByte(' ')
+	buffer.WriteString("TRANSACTION " + tx.id + " | ")
 
 	// format level
 	buffer.WriteString(msg.level.Type())
