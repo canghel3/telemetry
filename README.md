@@ -1,9 +1,11 @@
 ### Telemetry package
 
-A simple logging package. A major refactoring (v1.1.0) is underway. Version 1.0.1 is usable, but is not concurrency safe.
+A simple logging package. A
+Version 1.1.0 is safe for concurrency use.
+Version 1.0.1 is usable, but is not concurrency safe.
 
 ```bash
-go get -u github.com/Ginger955/telemetry@v1.0.1
+go get -u github.com/Ginger955/telemetry@v1.1.0
 ```
 
 ### Output
@@ -32,12 +34,13 @@ stdout := log.Stdout()
 
 stdout.Info().Log("foo")
 stdout.Error().Logf("encountered error: %s", "sample error")
-```
+````
 
 A log can also contain metadata.
 
 ```go
-log.Stdout().Metadata(map[any]any{"something":"clean"})
+//NOTE: re-using an output driver with metadata will result in all messages generated with this driver to contain the given metadata
+log.Stdout().WithMetadata(map[any]any{"something":"clean"})
 ```
 
 <b>Extendable</b> <br>
@@ -54,19 +57,18 @@ func (e example) Write(b []byte) (int, error) {
 
 
 ex := example{}
-log.OutputDriver(ex).Warn().Log([]byte("warning"))
+log.OutputDriver(ex).Warn().Log("warning")
 ```
 ### Levels
 
 <b>Built-in levels:</b>
-1. NoLevel
+1. Info
 2. Error
 3. Warn
-4. Info
-5. Debug
+4. Debug
 
 ```go
-log.Stdout().Info().Log([]byte("hello world"))
+log.Stdout().Info().Log("hello world")
 ```
 
 <b>Extendable</b><br>
@@ -74,11 +76,11 @@ Supports addition of self defined levels.
 
 ```go
 //In-line
-log.Stdout().Level(level.Custom("MAJOR")).Log([]byte("major level"))
+log.Stdout().Level(level.Custom("MAJOR")).Log("major level")
 
 //Reusing the level instance
 criticalLevel := level.Custom("CRITICAL")
-log.Stdout().Level(criticalLevel).Log([]byte("critical level"))
+log.Stdout().Level(criticalLevel).Log("critical level")
 
 ```
 
@@ -116,7 +118,7 @@ The log outputs can be customized using a configuration file. Configuration is l
 Each logger instance can be modified using a different configuration file.
 
 ```go
-log.Stdout().Settings(filename).Info().Log([]byte("with settings overwritten"))
+log.Stdout().Settings(filename).Info().Log("with settings overwritten")
 ```
 
 ### Transactions
@@ -126,8 +128,8 @@ A transaction can be used to group related logs together.
 ```go
 logTx := log.BeginTx()
 
-logTx.Append(log.Stdout().Info().Msg([]byte("first transaction entry")))
-logTx.Append(log.File(filename).Error().Msg([]byte("second line is an error")))
+logTx.Append(log.Stdout().Info().Msg("first transaction entry"))
+logTx.Append(log.File(filename).Error().Msgf("encountered error: %s", "sample error"))
 logTx.Log()
 ```
 
@@ -136,8 +138,8 @@ Transactions also support metadata.
 ```go
 logTx := log.BeginTxWithMetadata(map[any]any{"something":"clean"})
 
-logTx.Append(log.Stdout().Info().Msg([]byte("first transaction entry")))
-logTx.Append(log.File(filename).Error().Msg([]byte("second line is an error")))
+logTx.Append(log.Stdout().Info().Msg("first transaction entry"))
+logTx.Append(log.File(filename).Error().Msg("second line is an error"))
 logTx.Log()
 ```
 

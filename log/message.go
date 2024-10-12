@@ -24,26 +24,31 @@ func newMessage(output *Output, level level.Level) *Message {
 	}
 }
 
+// Metadata sets the metadata only for this message.
 func (m *Message) Metadata(meta map[any]any) *Message {
 	m.metadata = meta
 	return m
 }
 
+// Msg is only meant for use in log transactions.
 func (m *Message) Msg(msg string) *Message {
 	m.content = []byte(msg)
 	return m
 }
 
+// Msgf is only meant for use in log transactions.
 func (m *Message) Msgf(msg string, format ...any) *Message {
 	m.content = []byte(fmt.Sprintf(msg, format...))
 	return m
 }
 
+// Log logs to the corresponding output driver.
 func (m *Message) Log(msg string) {
 	m.content = []byte(msg)
 	m.log()
 }
 
+// Logf logs to the corresponding output driver based on the given format.
 func (m *Message) Logf(msg string, format ...any) {
 	m.content = []byte(fmt.Sprintf(msg, format...))
 	m.log()

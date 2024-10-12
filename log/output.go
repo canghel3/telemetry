@@ -38,7 +38,6 @@ func File(name string) *Output {
 // Stdout initiates an Output instance for logging to stdout.
 func Stdout() *Output {
 	d := Default()
-	d.driver = drivers.NewStdoutDriver()
 	return d
 }
 
@@ -97,6 +96,8 @@ func (o *Output) Settings(file string) *Output {
 	return n
 }
 
+// WithMetadata sets the metadata for the output driver.
+// All messages generated with this driver will contain the given metadata.
 func (o *Output) WithMetadata(meta map[any]any) *Output {
 	o.meta = meta
 	return o
