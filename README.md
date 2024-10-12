@@ -5,7 +5,7 @@ Version 1.1.0 is safe for concurrent use.
 Version 1.0.1 is usable, but is not concurrency safe.
 
 ```bash
-go get -u github.com/Ginger955/telemetry@v1.1.0
+go get github.com/Ginger955/telemetry@v1.1.0
 ```
 
 ### Output
