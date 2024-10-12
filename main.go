@@ -5,6 +5,7 @@ import (
 	"github.com/Ginger955/telemetry/log"
 	"github.com/spf13/viper"
 	"os"
+	"time"
 )
 
 var Stdout = log.Stdout()
@@ -44,6 +45,12 @@ func main() {
 	log.Stdout().Error().Log("HELLO")
 
 	std := log.Stdout()
+	time.Sleep(time.Millisecond * 50)
+	o := std.Settings("./telemetry.json")
+	std = log.File("./xyz.log")
+
+	o.Info().Log("t1")
+	std.Warn().Log("t2")
 
 	//settings are not persistent unless the output is assigned to a variable
 	std.Settings("some config file")
