@@ -1,7 +1,7 @@
 ### Telemetry package
 
-A simple logging package. A
-Version 1.1.0 is safe for concurrency use.
+A simple logging package.
+Version 1.1.0 is safe for concurrent use.
 Version 1.0.1 is usable, but is not concurrency safe.
 
 ```bash
