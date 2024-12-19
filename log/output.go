@@ -6,6 +6,7 @@ import (
 	"github.com/Ginger955/telemetry/drivers"
 	"github.com/Ginger955/telemetry/level"
 	"github.com/spf13/viper"
+	"io"
 	"sync"
 )
 
@@ -14,7 +15,7 @@ type Output struct {
 	// in order to return an exact shallow copy of your Output instance.
 	lock sync.Mutex
 
-	driver drivers.OutputDriver
+	driver io.Writer
 	config config.PkgConfig
 
 	meta map[any]any
@@ -42,7 +43,7 @@ func Stdout() *Output {
 }
 
 // OutputDriver initiates an Output instance for logging to a custom output driver.
-func OutputDriver(driver drivers.OutputDriver) *Output {
+func OutputDriver(driver io.Writer) *Output {
 	l := Default()
 	l.driver = driver
 	return l
