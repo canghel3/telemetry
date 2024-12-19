@@ -55,16 +55,16 @@ func (m *Message) Logf(msg string, format ...any) {
 }
 
 func (m *Message) log() {
-	var output = m.content
+	var content = m.content
 	if !m.output.config.Formatting.LogConfig.FormattingDisabled {
-		output = m.formatLogOutput()
+		content = m.formatLogOutput()
 	}
 
-	_, err := m.output.driver.Write(output)
+	_, err := m.output.driver.Write(content)
 	if err != nil {
 		//write the error encountered during writing to os.Stderr
-		//we could write to the log output driver because it implements the io.Writer,
-		//but if the output driver is fatally broken, the writing failure will be lost as well
+		//we could write to the log content driver because it implements the io.Writer,
+		//but if the content driver is fatally broken, the writing failure will be lost as well
 		//and debugging becomes more difficult.
 		fmt.Fprintf(os.Stderr, "failed to write log %s: %s\n", m.content, err.Error())
 	}

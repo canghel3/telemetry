@@ -67,9 +67,9 @@ func main() {
 
 	os.WriteFile(logfile, nil, 0644)
 
-	s = log.Stdout().WithMetadata(map[any]any{"5": 6})
+	s = log.Stdout().Metadata(map[any]any{"5": 6})
 	s.Info().Metadata(map[any]any{"1": 2}).Log("good mornin'")
 
-	k := log.Stdout().WithMetadata(map[any]any{"2": 3})
+	k := log.Stdout().Metadata(map[any]any{"2": 3})
 	k.Info().Log("good night")
 }

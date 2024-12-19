@@ -15,6 +15,7 @@ func NewFileDriver(name string) *FileDriver {
 	file, err := os.OpenFile(name, os.O_CREATE|os.O_WRONLY|os.O_APPEND, os.ModeAppend)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to open file %s: %s", name, err.Error())
+		file = os.Stdout
 	}
 
 	return &FileDriver{

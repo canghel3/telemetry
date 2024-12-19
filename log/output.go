@@ -97,9 +97,9 @@ func (o *Output) Settings(file string) *Output {
 	return n
 }
 
-// WithMetadata sets the metadata for the output driver.
+// Metadata sets the metadata for the output driver.
 // All messages generated with this driver will contain the given metadata.
-func (o *Output) WithMetadata(meta map[any]any) *Output {
+func (o *Output) Metadata(meta map[any]any) *Output {
 	o.meta = meta
 	return o
 }
