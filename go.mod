@@ -1,4 +1,4 @@
-module github.com/Ginger955/telemetry
+module github.com/canghel3/telemetry
 
 go 1.22.3
 
