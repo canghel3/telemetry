@@ -45,6 +45,11 @@ func main() {
 	log.Stdout().Error().Log("HELLO")
 
 	std := log.Stdout()
+
+	m := std.Info()
+	std = log.File("./xyz.log")
+	m.Log("t1")
+
 	time.Sleep(time.Millisecond * 50)
 	o := std.Settings("./telemetry.json")
 	std = log.File("./xyz.log")
