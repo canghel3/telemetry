@@ -25,6 +25,7 @@ func newMessage(output *Output, level level.Level) *Message {
 }
 
 // Metadata sets the metadata only for this message.
+// TODO: instead of overwriting metadata passed from the Output, store separate metadat for this message only
 func (m *Message) Metadata(meta map[any]any) *Message {
 	m.metadata = meta
 	return m
