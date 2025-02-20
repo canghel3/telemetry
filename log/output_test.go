@@ -3,7 +3,7 @@ package log
 import (
 	"bytes"
 	"fmt"
-	"github.com/Ginger955/telemetry/level"
+	"github.com/canghel3/telemetry/level"
 	"gotest.tools/v3/assert"
 	"io"
 	"os"

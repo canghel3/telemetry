@@ -1,11 +1,9 @@
 ### Telemetry package
 
 A simple logging package.
-Version 1.1.0 is safe for concurrent use.
-Version 1.0.1 is usable, but is not concurrency safe.
 
 ```bash
-go get github.com/Ginger955/telemetry@v1.1.0
+go get github.com/canghel3/telemetry@v1.1.1
 ```
 
 ### Output
