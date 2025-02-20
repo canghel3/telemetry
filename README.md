@@ -3,7 +3,7 @@
 A simple logging package.
 
 ```bash
-go get github.com/canghel3/telemetry@v1.1.1
+go get github.com/canghel3/telemetry@v1.1.2
 ```
 
 ### Output
